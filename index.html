@@ -320,6 +320,72 @@ const SPECIES = {
     moves:[[1,'용병의 일격',58,null],[1,'혼혈의 분노',72,'야근'],[36,'전장의 본능',92,'야근'],[40,'두 종족의 함성',108,'야근']] },
   paperdragon:{ name:'종이용', type:'서류', hp:110, atk:24, fusion:true,
     moves:[[1,'종이 발톱',58,null],[1,'천 장의 날개',74,'서류'],[36,'기밀문서 브레스',94,'서류'],[40,'서고의 종언',112,'서류']] },
+  /* ── 이세계 후반 (마왕 토벌 후 해금: 천공/심해/화산/차원의 탑) ── */
+  pegasusporter:{ name:'페가수스택배', type:'카페인', hp:62, atk:19, evo:{lv:48,to:'unicornexpress'},
+    moves:[[1,'날개 찍기',56,null],[1,'특급 배송 돌진',70,'카페인'],[44,'에스프레소 부스터',88,'카페인'],[47,'천공 익일배송',102,'카페인']] },
+  unicornexpress:{ name:'유니콘특급', type:'카페인', hp:88, atk:23, evo:{lv:56,to:'alicornlogis',mut:{p:0.12,to:'nightmarecourier'}},
+    moves:[[1,'뿔 가르기',62,null],[1,'무지개 항로',76,'카페인'],[50,'음속 배송 혼',96,'카페인'],[55,'프리미엄 새벽배송',112,'카페인']] },
+  alicornlogis:{ name:'알리콘물류신', type:'카페인', hp:118, atk:27,
+    moves:[[1,'신성한 날개짓',68,null],[1,'물류의 심판',82,'카페인'],[58,'전 차원 풀필먼트',102,'카페인'],[62,'배송 완료의 기적',120,'카페인']] },
+  nightmarecourier:{ name:'나이트메어심야배송', type:'야근', hp:108, atk:30,
+    moves:[[1,'어둠의 발굽',68,null],[1,'심야 라이딩',84,'야근'],[58,'악몽 특송',104,'야근'],[62,'새벽 3시의 초인종',122,'야근']] },
+  cloudsheep:{ name:'구름양떼몬', type:'서류', hp:70, atk:18, evo:{lv:50,to:'stormram'},
+    moves:[[1,'폭신 박치기',56,null],[1,'양털 서류뭉치',70,'서류'],[45,'뭉게뭉게 압사',88,'서류'],[49,'적란운 소환',100,'서류']] },
+  stormram:{ name:'뇌운숫양', type:'전자', hp:102, atk:24,
+    moves:[[1,'천둥 들이받기',64,null],[1,'정전기 양털',78,'전자'],[52,'낙뢰 차지',98,'전자'],[57,'폭풍전선 돌파',114,'전자']] },
+  harpyannouncer:{ name:'하피사내방송', type:'전자', hp:84, atk:22,
+    moves:[[1,'발톱 낚아채기',60,null],[1,'고막 테러 방송',74,'전자'],[48,'전체 공지 스피커',92,'전자'],[53,'클라이맥스 갈채',108,'전자']] },
+  krakenintern:{ name:'크라켄말단', type:'전자', hp:78, atk:20, evo:{lv:53,to:'krakenchief'},
+    moves:[[1,'촉수 찰싹',58,null],[1,'먹물 복사기',72,'전자'],[48,'8개 팔 멀티태스킹',90,'전자'],[52,'심해 케이블 절단',104,'전자']] },
+  krakenchief:{ name:'크라켄차장', type:'전자', hp:104, atk:24, evo:{lv:61,to:'abysskraken'},
+    moves:[[1,'결재 촉수',64,null],[1,'먹물 반려 도장',78,'전자'],[55,'심해압 프레스',98,'전자'],[60,'8연속 업무지시',114,'전자']] },
+  abysskraken:{ name:'심연크라켄', type:'전자', hp:134, atk:28,
+    moves:[[1,'심연의 포옹',70,null],[1,'해구 소용돌이',84,'전자'],[62,'수압 만 미터',104,'전자'],[66,'크라켄의 침몰 명령',122,'전자']] },
+  mermaidcs:{ name:'인어상담원', type:'카페인', hp:72, atk:21, evo:{lv:54,to:'sirenlead',mut:{p:0.12,to:'deepsiren'}},
+    moves:[[1,'지느러미 스매시',58,null],[1,'상담사의 미소',72,'카페인'],[49,'진상 응대 매뉴얼',90,'카페인'],[53,'녹취 고지 송곳니',106,'카페인']] },
+  sirenlead:{ name:'세이렌팀장', type:'카페인', hp:98, atk:25,
+    moves:[[1,'마성의 안내멘트',64,null],[1,'홀리는 콜백',78,'카페인'],[56,'대기열 최면곡',98,'카페인'],[60,'클레임 자장가',116,'카페인']] },
+  deepsiren:{ name:'심해세이렌', type:'야근', hp:92, atk:28,
+    moves:[[1,'심해의 절규',64,null],[1,'끊기지 않는 콜',80,'야근'],[56,'무한 대기음',100,'야근'],[60,'영혼까지 상담',118,'야근']] },
+  anglerlamp:{ name:'아귀스탠드', type:'전자', hp:88, atk:21,
+    moves:[[1,'덥석 물기',60,null],[1,'유혹의 등불',74,'전자'],[50,'심해 플래시',92,'전자'],[55,'야간 조명 풀파워',108,'전자']] },
+  ghostshipclerk:{ name:'유령선경리', type:'서류', hp:94, atk:22,
+    moves:[[1,'녹슨 주판 투척',60,null],[1,'침몰한 장부',74,'서류'],[50,'백년 미정산',94,'서류'],[55,'유령 선단 소환',110,'서류']] },
+  salamandersmith:{ name:'샐러맨더용접공', type:'카페인', hp:80, atk:22, evo:{lv:57,to:'ifritmaster'},
+    moves:[[1,'불꽃 꼬리',60,null],[1,'용접 토치',76,'카페인'],[52,'마그마 에스프레소',94,'카페인'],[56,'풀가동 용광로',110,'카페인']] },
+  ifritmaster:{ name:'이프리트장인', type:'카페인', hp:106, atk:26, evo:{lv:64,to:'volcanolord',mut:{p:0.12,to:'frostsalamander'}},
+    moves:[[1,'작열 망치질',66,null],[1,'장인의 불꽃',82,'카페인'],[58,'천 도의 담금질',102,'카페인'],[63,'명장의 혼 폭발',118,'카페인']] },
+  volcanolord:{ name:'화산군주', type:'카페인', hp:138, atk:29,
+    moves:[[1,'분화구 주먹',72,null],[1,'용암 폭포',88,'카페인'],[65,'칼데라 붕괴',108,'카페인'],[69,'대분화 카니발',126,'카페인']] },
+  frostsalamander:{ name:'서리샐러맨더', type:'전자', hp:122, atk:31,
+    moves:[[1,'얼어붙은 꼬리',72,null],[1,'절대영도 토치',88,'전자'],[65,'빙하 용접',110,'전자'],[69,'영구동토의 숨결',128,'전자']] },
+  magmagolem:{ name:'마그마골렘', type:'전자', hp:100, atk:22, evo:{lv:58,to:'obsidiangolem'},
+    moves:[[1,'용암 주먹',62,null],[1,'과열 코어 방출',78,'전자'],[53,'분출 펀치',96,'전자'],[57,'노심 한계 돌파',112,'전자']] },
+  obsidiangolem:{ name:'흑요석골렘', type:'전자', hp:130, atk:26,
+    moves:[[1,'흑요석 날',68,null],[1,'유리질 장갑 돌진',84,'전자'],[60,'화산유리 폭풍',102,'전자'],[64,'심장 코어 임계',120,'전자']] },
+  ashbird:{ name:'잿불새', type:'서류', hp:86, atk:23,
+    moves:[[1,'잿빛 날개',62,null],[1,'불씨 깃털',78,'서류'],[54,'소각장 회오리',96,'서류'],[58,'파쇄 문서 화장',112,'서류']] },
+  timewraith:{ name:'시간망령', type:'야근', hp:84, atk:24, evo:{lv:60,to:'chronoreaper',mut:{p:0.12,to:'paradoxwraith'}},
+    moves:[[1,'시침 베기',62,null],[1,'마감 시간 조작',78,'야근'],[56,'잃어버린 주말',98,'야근'],[59,'시간외 수당 청구',114,'야근']] },
+  chronoreaper:{ name:'크로노리퍼', type:'야근', hp:112, atk:29,
+    moves:[[1,'대낫 휘두르기',70,null],[1,'수명 정산',86,'야근'],[62,'타임 스킵 강타',106,'야근'],[66,'영원의 마감 집행',124,'야근']] },
+  paradoxwraith:{ name:'패러독스망령', type:'전자', hp:104, atk:32,
+    moves:[[1,'역행 베기',70,null],[1,'인과율 버그',88,'전자'],[62,'어제의 내일 폭발',108,'전자'],[66,'무한 루프 처형',126,'전자']] },
+  voidcat:{ name:'보이드냥', type:'야근', hp:76, atk:25, evo:{lv:61,to:'voidpanther'},
+    moves:[[1,'공허 할퀴기',62,null],[1,'차원 츄르 강탈',78,'야근'],[57,'무(無)의 꾹꾹이',98,'야근'],[60,'존재 삭제 펀치',114,'야근']] },
+  voidpanther:{ name:'보이드팬서', type:'야근', hp:108, atk:30,
+    moves:[[1,'암흑 도약',70,null],[1,'공허의 송곳니',86,'야근'],[63,'차원 절단 발톱',106,'야근'],[67,'블랙홀 그루밍',124,'야근']] },
+  stardustslime:{ name:'스타더스트슬라임', type:'전자', hp:82, atk:23,
+    moves:[[1,'별가루 점액',62,null],[1,'유성 낙하',78,'전자'],[57,'은하수 분출',96,'전자'],[61,'초신성 바운스',112,'전자']] },
+  dimensionbutler:{ name:'차원집사', type:'서류', hp:96, atk:24,
+    moves:[[1,'정중한 일격',64,null],[1,'차원 다과 서빙',80,'서류'],[58,'시공간 청소',98,'서류'],[62,'주인님의 명령서',116,'서류']] },
+  /* ── 이세계 후반 합성 전용 ── */
+  tempestphoenix:{ name:'폭풍재불사조', type:'카페인', hp:124, atk:29, fusion:true,
+    moves:[[1,'재의 날개',68,null],[1,'폭풍 점화',84,'카페인'],[54,'부활의 상승기류',104,'카페인'],[60,'천둥 화장 폭풍',122,'카페인']] },
+  eternitycat:{ name:'영겁냥', type:'야근', hp:118, atk:31, fusion:true,
+    moves:[[1,'영원의 발바닥',70,null],[1,'시간 정지 그루밍',86,'야근'],[56,'천년 낮잠 펀치',106,'야근'],[62,'영겁의 야근 발톱',126,'야근']] },
+  genielamp:{ name:'지니램프', type:'전자', hp:110, atk:28, fusion:true,
+    moves:[[1,'램프 스핀',66,null],[1,'소원 역청구',82,'전자'],[54,'천일야화 오버차지',102,'전자'],[60,'세 가지 소원 폭격',120,'전자']] },
   /* ── 패치 보상 특별 캐릭터 (야생 미출현, 전원 지급) ── */
   leejunseok:{ name:'무승복서 이준석', type:'카페인', hp:45, atk:9, legend:true,
     moves:[[1,'잽잽',30,null],[1,'무승부 클린치',40,'카페인'],[12,'노 데미지 위빙',55,'카페인'],[18,'판정 끝까지 간다',70,'카페인']] },
@@ -338,6 +404,8 @@ const SPECIES = {
     moves:[[1,'경영 철학 설파',56,null],[1,'창업 정신 화염',70,'야근'],[20,'구조조정 날개',88,'야근'],[24,'레거시의 불꽃',100,'야근']] },
   burnoutlord:{ name:'마왕 번아웃', type:'야근', hp:160, atk:24, legend:true,
     moves:[[1,'마왕의 위압',62,null],[1,'영혼 갈아넣기',76,'야근'],[40,'심야의 업무 지옥불',96,'야근'],[44,'번아웃 노바',114,'야근']] },
+  overgod:{ name:'차원신 데드라인', type:'야근', hp:200, atk:30, legend:true,
+    moves:[[1,'신의 독촉',76,null],[1,'차원 마감선 강하',90,'야근'],[58,'전 우주 동시 마감',112,'야근'],[64,'데드라인 빅뱅',132,'야근']] },
 };
 const ALL_SIDS = Object.keys(SPECIES);
 
@@ -386,6 +454,23 @@ const FLOORS = [
   { name:'이세계 — 마왕성', areas:[
       { name:'마왕성 회랑', lv:[40,44], pool:['dukebroker','fortressgolem','orcwarlord'], flavor:'검은 첨탑 안. 공기가 무겁다. 전생의 야근차원과 똑같은 기운이다.' },
     ], boss:10 },
+  /* ── 이세계 후반 (마왕 토벌 후 해금) ── */
+  { name:'이세계 — 천공도시 스카이워크', areas:[
+      { name:'구름 부두', lv:[44,48], pool:['pegasusporter','cloudsheep'], flavor:'구름 위에 떠 있는 항구 도시. 페가수스들이 택배 상자를 지고 분주히 오간다.' },
+      { name:'천공 상점가', lv:[47,51], pool:['harpyannouncer','cloudsheep','pegasusporter'], flavor:'하늘을 가르는 사내방송. "오늘의 특가, 구름 솜사탕—" 고막이 아프다.' },
+    ], boss:11 },
+  { name:'이세계 — 심해 결재국', areas:[
+      { name:'심해 문서고', lv:[48,52], pool:['krakenintern','anglerlamp'], flavor:'수압에 눌린 서류 캐비닛이 끝없이 이어진다. 어둠 속에서 등불이 흔들린다.' },
+      { name:'침몰선 금고', lv:[51,55], pool:['mermaidcs','ghostshipclerk','anglerlamp'], flavor:'백 년 전 침몰한 무역선. 정산되지 못한 장부가 해류에 펄럭인다.' },
+    ], boss:12 },
+  { name:'이세계 — 화산 야근공단', areas:[
+      { name:'용암 제련소', lv:[52,56], pool:['salamandersmith','magmagolem'], flavor:'용암 위에 지어진 거대한 공장. 24시간 3교대의 불길이 꺼지지 않는다.' },
+      { name:'재의 평원', lv:[55,59], pool:['ashbird','magmagolem','salamandersmith'], flavor:'파쇄된 기밀문서의 재가 눈처럼 내린다. 잿더미 속에서 무언가 날아오른다.' },
+    ], boss:13 },
+  { name:'이세계 — 차원의 탑', areas:[
+      { name:'탑 하층 — 멈춘 시계의 방', lv:[56,60], pool:['timewraith','stardustslime'], flavor:'벽면 가득한 시계가 전부 다른 시각에 멈춰 있다. 시간의 망령이 떠돈다.' },
+      { name:'탑 정상 회랑', lv:[59,63], pool:['voidcat','dimensionbutler','timewraith'], flavor:'별이 발밑에 흐른다. 모든 차원의 마감이 모이는 곳. 정상에 \'신\'이 있다.' },
+    ], boss:14 },
 ];
 
 const BOSSES = [
@@ -423,6 +508,19 @@ const BOSSES = [
   { name:'마왕 번아웃', pre:'옥좌의 어둠이 일어선다. "잘 왔다, 과로사한 영혼이여. 나는 모든 세계의 야근이 모여 태어난 존재… 너의 마지막 상사다."',
     party:[['darkelf',41],['dukebroker',42],['burnoutlord',44]], reward:50000,
     win:'마왕이 무너지며 속삭였다. "…쉬어라. 두 세계 모두… 이제 정시에 잠들 것이다."' },
+  /* ── 이세계 후반 보스 ── */
+  { name:'천공시장 그리폰관세사', pre:'"하늘길을 지나는 모든 화물에는 관세가 붙는다. 이방인, 통행세를 몸으로 내겠나?" 거대한 날개가 태양을 가린다.',
+    party:[['stormram',49],['harpyannouncer',48],['alicornlogis',50]], reward:30000,
+    win:'"…관세 면제다. 심해 결재국으로 가는 해류 통행증을 발급해 주지. 그곳의 어둠을 조심해라."' },
+  { name:'심해군주 크라켄전무', pre:'심해가 끓어오른다. "백 년간 결재되지 못한 서류들의 원한… 그 무게를 아는가?" 여덟 개의 촉수가 도장을 쥐고 있다.',
+    party:[['abysskraken',54],['sirenlead',53],['ghostshipclerk',52]], reward:40000,
+    win:'"전결… 승인. 화산 야근공단으로 가는 해저 화도를 열겠다. 그곳은 불의 잔업 지옥이다."' },
+  { name:'공단장 이프리트', pre:'"우리 공단은 천 년째 무재해… 아니, 무퇴근이다!! 너도 여기서 일해 보겠나?!" 용암이 솟구친다.',
+    party:[['volcanolord',58],['obsidiangolem',57],['ashbird',56]], reward:55000,
+    win:'"…공장의 불을… 처음으로 꺼 본다. 차원의 탑이 보이는가. 모든 마감의 근원이 그 정상에 있다."' },
+  { name:'차원신 데드라인', pre:'탑의 정상. 별들이 멈춘다. "나는 모든 차원의 마감을 관장하는 신. 야근도, 마왕도, 전부 나의 그림자였다. — 최후의 마감을 시작하지."',
+    party:[['chronoreaper',61],['voidpanther',62],['overgod',64]], reward:99999,
+    win:'차원신이 미소 지으며 흩어졌다. "…마감 없는 세계라. 그것도… 나쁘지 않군. 모든 차원에 알리노라 — 데드라인은 폐지되었다."' },
 ];
 
 const STORY = [
@@ -439,7 +537,12 @@ const STORY = [
   ['제2부 3장 — 황혼 미궁','대마법사가 길을 열어 주었다. 미궁의 주인은 퇴실 기록에 집착하는 괴물.','진화 시 아주 드물게 돌연변이 개체가 태어난다는 소문도 들려온다.'],
   ['제2부 4장 — 마왕성 가도','미궁을 돌파했다. 마왕성으로 향하는 가도에는 마왕군 총사령이 버티고 있다.','망자의 평원을 지나 야영지를 돌파하자. 합성 실험실의 신종 레시피도 늘었다.'],
   ['제2부 최종장 — 마왕성','총사령마저 길을 비켰다. 모든 세계의 야근이 모인 존재, 마왕 번아웃.','이번 상대는 차원이 다르다. 도핑과 합성 없이는 어려울 것이다.'],
-  ['제2부 엔딩 — 두 세계의 평온','마왕 번아웃이 토벌되었다. 사무실에도, 이세계에도 평온이 찾아왔다.','남은 목표: 도감 완성. 마왕성 회랑에는 마왕 번아웃이 야생 개체로 드물게 출현한다.'],
+  ['제2부 엔딩 — 두 세계의 평온','마왕 번아웃이 토벌되었다. 사무실에도, 이세계에도 평온이 찾아왔다.','…그러나 하늘에 또 다른 균열이. 새 지역 [천공도시 스카이워크]가 해금되었다! (차원 이동)'],
+  /* ── 이세계 후반 (마왕 토벌 후): 제2부 엔딩(idx 12)이 천공도시(5장) 안내를 겸한다 ── */
+  ['제2부 6장 — 가라앉은 결재','천공시장 관세사가 길을 열었다. 심해 결재국 — 백 년 묵은 미결재 서류가 가라앉은 바다.','새 클립이 매점에 들어왔다는 소문이다. 포획 장비를 갖추고 잠수하자.'],
+  ['제2부 7장 — 꺼지지 않는 불','심해의 어둠을 통과했다. 화산 야근공단의 용광로는 천 년째 꺼진 적이 없다.','공단장 이프리트가 기다린다. 도핑과 합성 없이는 버티기 어려운 열기다.'],
+  ['제2부 진최종장 — 차원의 탑','공단의 불이 꺼졌다. 모든 차원의 마감이 모이는 탑 — 그 정상에 \'신\'이 있다.','마왕조차 그림자에 불과했다는 차원신 데드라인. 모든 것을 쏟아부어 도전하자.'],
+  ['제2부 진엔딩 — 데드라인 폐지','차원신이 스스로 마감을 폐지했다. 모든 세계, 모든 차원에 정시퇴근이 찾아왔다.','남은 목표: 도감 완성. 탑 정상에는 차원신 데드라인이 야생 개체로 드물게 출현한다.'],
 ];
 /* 2부 진입 후에는 STORY 7~10(2부 챕터)을 story+1로 가리킨다 */
 function storyIdx(){
@@ -501,7 +604,7 @@ function newGame(){
   G = {
     v:3, screen:'title', name:'',
     party:[], box:[], active:0,
-    items:{ clip:5, goldclip:0, bacchus:3, hotsix:0, coffee:0, ample:0 },
+    items:{ clip:5, goldclip:0, prismclip:0, dimclip:0, bacchus:3, hotsix:0, coffee:0, ample:0 },
     money:200, wins:0, story:0, isekai:false, gifts:{},
     dex:{}, rarDex:{}, dexRewards:[],
     battle:null, log:[], floor:0, coolerCd:0,
@@ -514,6 +617,8 @@ newGame();
 const ITEM_DEF = {
   clip:    { name:'집게클립',  desc:'야생 몬스터 포획', price:50 },
   goldclip:{ name:'골드클립',  desc:'포획률 1.6배', price:140 },
+  prismclip:{ name:'프리즘클립', desc:'포획률 2.4배', price:420 },
+  dimclip: { name:'차원클립',  desc:'포획률 4배 — 전설급도 노려볼 만하다', price:1500 },
   bacchus: { name:'박카스',    desc:'HP 35 회복', price:70 },
   hotsix:  { name:'핫식스',    desc:'HP 완전 회복', price:180 },
   coffee:  { name:'모닝커피',  desc:'기절 회복 (HP 50%)', price:220 },
@@ -564,7 +669,10 @@ function checkDexRewards(){
     [16, ()=>{ G.items.hotsix+=2;  return '도감 16종 달성! 보상: 핫식스 ×2'; }],
     [24, ()=>{ G.items.coffee+=2; G.money+=1000; return '도감 24종 달성! 보상: 모닝커피 ×2, 1000P'; }],
     [30, ()=>{ G.items.goldclip+=5; G.money+=2000; return '도감 30종 달성! 보상: 골드클립 ×5, 2000P'; }],
-    [ALL_SIDS.length, ()=>{ G.money+=9999; return '★ 도감 완성!! 전설의 수집가! 보상: 9999P ★'; }],
+    [45, ()=>{ G.items.prismclip+=3; G.money+=3000; return '도감 45종 달성! 보상: 프리즘클립 ×3, 3000P'; }],
+    [60, ()=>{ G.items.dimclip+=2; G.money+=5000; return '도감 60종 달성! 보상: 차원클립 ×2, 5000P'; }],
+    [80, ()=>{ G.items.prismclip+=5; G.items.dimclip+=3; G.money+=10000; return '도감 80종 달성! 보상: 프리즘클립 ×5, 차원클립 ×3, 10000P'; }],
+    [ALL_SIDS.length, ()=>{ G.money+=99999; return '★ 도감 완성!! 전설의 수집가! 보상: 99999P ★'; }],
   ];
   for(const [t,fn] of tiers){
     if(n>=t && !G.dexRewards.includes(t)){
@@ -656,7 +764,7 @@ async function loadRank(){
   }catch(e){ rankCache = []; }
   if(G.screen==='rank' && !bossMode) paintRank();
 }
-const PROG_LABEL = ['1장','2장','3장','4장','최종장','엔딩','진엔딩 ★','이세계 1장','이세계 2장','이세계 3장','이세계 4장','이세계 최종장','이세계 클리어 ★★'];
+const PROG_LABEL = ['1장','2장','3장','4장','최종장','엔딩','진엔딩 ★','이세계 1장','이세계 2장','이세계 3장','이세계 4장','이세계 최종장','이세계 5장 ★★','이세계 6장','이세계 7장','이세계 진최종장','전차원 클리어 ★★★'];
 function paintRank(){
   clearGrid();
   setCell(2,1,'― 사내 랭킹 보드 ―  (함께 플레이하는 전원에게 공개)','bold');
@@ -1128,6 +1236,10 @@ const FUSION_RECIPES = [
   { mats:['wyvernfax','mimicdesk'],   to:'paperdragon' },
   /* 패치 보상 캐릭터 합성 */
   { mats:['leejunseok','parksangkyu'], to:'wontaebo' },
+  /* 이세계 후반 레시피 */
+  { mats:['stormram','ashbird'],      to:'tempestphoenix' },
+  { mats:['voidcat','timewraith'],    to:'eternitycat' },
+  { mats:['anglerlamp','spiritlamp'], to:'genielamp' },
 ];
 function allMons(){ return [...G.party, ...G.box]; }
 function removeMon(m){
@@ -1210,18 +1322,23 @@ function scrFusion(){
   paint(lines, choices);
 }
 
-/* ── 도감 ── */
+/* ── 도감 (종 수 증가로 페이지 분할: 3열 × 26행 = 페이지당 78종) ── */
+const DEX_PER_COL = 26;
+const DEX_PER_PAGE = DEX_PER_COL * 3;
+let dexPage = 0;
 function scrDex(){
   clearGrid();
-  setCell(2,1,`― 오피스 몬스터 도감 ―  등록 ${dexCaughtCount()} / ${ALL_SIDS.length}`,'bold');
+  const totalPages = Math.max(1, Math.ceil(ALL_SIDS.length/DEX_PER_PAGE));
+  if(dexPage >= totalPages) dexPage = 0;
+  setCell(2,1,`― 오피스 몬스터 도감 ―  등록 ${dexCaughtCount()} / ${ALL_SIDS.length}  (${dexPage+1}/${totalPages}페이지)`,'bold');
   setCell(3,1,'─ 미확인 / 👁 목격 / ✔ 포획 / ★ 황금 / ◆ 프리즘 / 👑 레전드','dim');
-  /* 종 수 증가로 3열 배치 (2열은 32행 그리드를 넘친다) */
-  const perCol = Math.ceil(ALL_SIDS.length/3);
-  ALL_SIDS.forEach((sid,i)=>{
-    const col = 1 + Math.floor(i/perCol)*3;
-    const r = 5 + (i%perCol);
+  const pageSids = ALL_SIDS.slice(dexPage*DEX_PER_PAGE, (dexPage+1)*DEX_PER_PAGE);
+  pageSids.forEach((sid,j)=>{
+    const i = dexPage*DEX_PER_PAGE + j;
+    const col = 1 + Math.floor(j/DEX_PER_COL)*3;
+    const r = 5 + (j%DEX_PER_COL);
     const st = G.dex[sid]||0;
-    const no = String(i+1).padStart(2,'0');
+    const no = String(i+1).padStart(3,'0');
     let mark = '─', name='?????', cls='dim';
     if(st===1){ mark='👁'; name=SPECIES[sid].name; cls='dim'; }
     if(st===2){
@@ -1235,6 +1352,7 @@ function scrDex(){
     if(st>0) setCell(r,col+2,`[${SPECIES[sid].type}]`,'dim');
   });
   setCell(ROWS-1,1,'1. 돌아간다','choice',()=>{ G.screen='hub'; render(); });
+  if(totalPages>1) setCell(ROWS-1,4,`2. 다음 페이지 →`,'choice',()=>{ dexPage=(dexPage+1)%totalPages; render(); });
   setFx(`=COUNTIF(도감, "포획") → ${dexCaughtCount()}`);
 }
 
@@ -1251,8 +1369,9 @@ function startExplore(area){
       if(G.story>=6 && Math.random()<0.03) pool=['phoenix'];
     }
     if(G.floor===10 && G.story>=11 && Math.random()<0.04) pool=['burnoutlord'];
+    if(G.floor===14 && G.story>=15 && Math.random()<0.03) pool=['overgod'];
     const sid = pool[Math.floor(Math.random()*pool.length)];
-    const LEGEND_WILD_LV = { dragon:18, phoenix:24, burnoutlord:40 };
+    const LEGEND_WILD_LV = { dragon:18, phoenix:24, burnoutlord:40, overgod:60 };
     const lv = SPECIES[sid].legend
       ? (LEGEND_WILD_LV[sid]||24)
       : area.lv[0] + Math.floor(Math.random()*(area.lv[1]-area.lv[0]+1));
@@ -1441,7 +1560,7 @@ function onTrainerMonDown(){
     if(!canAutoSave) pushLog('💾 큰 진행을 했다! [백업 코드]를 발급해 보관해 두자.');
     if(b.bossIdx===G.story){
       G.story++;
-      if(G.story===5 || G.story===6 || G.story===11){ setTimeout(()=>{ G.screen='ending'; render(); },40); return; }
+      if(G.story===5 || G.story===6 || G.story===11 || G.story===15){ setTimeout(()=>{ G.screen='ending'; render(); },40); return; }
       b.afterStory = true;
     }
   }
@@ -1464,13 +1583,14 @@ function playerMove(mvIdx){
   render();
 }
 
-function throwClip(gold){
+const CLIP_MULT = { clip:1, goldclip:1.6, prismclip:2.4, dimclip:4 };
+function throwClip(key){
   const b=G.battle; if(b.over||!b.wild) return;
-  const key = gold?'goldclip':'clip';
+  if(typeof key!=='string') key = key?'goldclip':'clip'; /* 구버전 호출(boolean) 호환 */
   if(G.items[key]<=0){ pushLog(`${ITEM_DEF[key].name}이(가) 없다!`); render(); return; }
   G.items[key]--;
   const e=b.enemy;
-  let chance = (0.22 + 0.65*(1 - e.hp/e.maxhp)) * (gold?1.6:1);
+  let chance = (0.22 + 0.65*(1 - e.hp/e.maxhp)) * CLIP_MULT[key];
   chance *= RARITY[e.rar||'normal'].catch;
   if(SPECIES[e.sid].legend) chance *= 0.45;
   b.menu='main';
@@ -1549,8 +1669,10 @@ function scrBattle(){
     choices.push(['← 뒤로', ()=>{ b.menu='main'; render(); }]);
   } else if(b.menu==='bag'){
     if(b.wild){
-      choices.push([`집게클립 던지기 (${G.items.clip})`, ()=>throwClip(false)]);
-      if(G.items.goldclip>0) choices.push([`골드클립 던지기 (${G.items.goldclip})`, ()=>throwClip(true)]);
+      for(const ck of Object.keys(CLIP_MULT)){
+        if(ck==='clip' || G.items[ck]>0)
+          choices.push([`${ITEM_DEF[ck].name} 던지기 (${G.items[ck]})`, ()=>throwClip(ck)]);
+      }
     }
     choices.push([`박카스 — HP 35 (${G.items.bacchus})`, ()=>useHeal('bacchus')]);
     if(G.items.hotsix>0) choices.push([`핫식스 — 완전 회복 (${G.items.hotsix})`, ()=>useHeal('hotsix')]);
@@ -1586,14 +1708,23 @@ function scrGameover(){
 
 function scrEnding(){
   cloudSave(true); updateBoard(true);
+  const dimensionClear = G.story>=15;
   const isekaiClear = G.story>=11;
   const final = G.story>=6;
-  const lines = isekaiClear ? [
+  const lines = dimensionClear ? [
+    ['★★★★ 진엔딩 — 모든 차원의 영웅 ★★★★','bold'],'',
+    '차원신 데드라인이 스스로 마감을 폐지했다. 모든 세계에 정시퇴근이 찾아왔다.',
+    '사무실 차원, 이세계, 천공과 심해와 화산까지 — 당신의 이름이 전설로 새겨졌다.','',
+    [`최종 기록 — 승수 ${G.wins} / 도감 ${dexCaughtCount()}/${ALL_SIDS.length} / 희귀 ${Object.keys(G.rarDex).length}종`,'hl'],'',
+    '남은 목표: 도감 완성 — 돌연변이 진화종, 합성 신종, 그리고 차원신 데드라인 포획',
+    '(차원신 데드라인은 탑 정상 회랑에서 야생 개체로 드물게 출현한다)',
+  ] : isekaiClear ? [
     ['★★★ 제2부 클리어 — 두 세계의 영웅 ★★★','bold'],'',
     '마왕 번아웃이 토벌되었다. 이세계의 하늘에서 야근의 구름이 걷혔다.',
-    '왕국에는 "주 4일 모험제"가 선포되었고, 사무실 차원과의 균열은 평화의 문이 되었다.','',
-    [`최종 기록 — 승수 ${G.wins} / 도감 ${dexCaughtCount()}/${ALL_SIDS.length} / 희귀 ${Object.keys(G.rarDex).length}종`,'hl'],'',
-    '남은 목표: 도감 완성 — 돌연변이 진화종, 합성 신종, 그리고 마왕 번아웃 포획',
+    '…그런데 하늘 저편에 거대한 균열이 또 열렸다. 구름 위에 도시가 보인다.','',
+    [`기록 — 승수 ${G.wins} / 도감 ${dexCaughtCount()}/${ALL_SIDS.length} / 희귀 ${Object.keys(G.rarDex).length}종`,'hl'],'',
+    ['새 지역 [천공도시 스카이워크]가 해금되었습니다! (차원 이동에서 이동)','hl'],
+    '천공 너머에는 심해, 화산, 그리고 차원의 탑이… 진정한 최종 보스가 기다린다.',
     '(마왕 번아웃은 마왕성 회랑에서 야생 개체로 드물게 출현한다)',
   ] : final ? [
     ['★★★ 진엔딩 — 전설의 사원 ★★★','bold'],'',
@@ -1644,6 +1775,8 @@ function migrateSave(obj){
   if(!obj.rarDex) obj.rarDex = {};
   if(!obj.coolerCd) obj.coolerCd = 0;
   if(obj.items && obj.items.ample===undefined) obj.items.ample = 0;
+  if(obj.items && obj.items.prismclip===undefined) obj.items.prismclip = 0;
+  if(obj.items && obj.items.dimclip===undefined) obj.items.dimclip = 0;
   if(obj.isekai===undefined) obj.isekai = false;
   if(!obj.gifts) obj.gifts = {};
   return obj;
