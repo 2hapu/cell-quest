@@ -422,6 +422,26 @@ let pendingMsg = [];
 const hasCloud = (typeof window!=='undefined') && !!window.storage;
 let cloudSaveData = null, lastCloudSave = 0, lastBoardSave = 0;
 
+/* ── 로컬 캐시 자동 저장 (GitHub Pages 등 클라우드 없는 환경) ──
+   브라우저 localStorage에 기록을 남긴다. 기기 간 이동은 여전히 백업 코드 사용. */
+const LOCAL_KEY = 'cellquest_save';
+const hasLocal = (()=>{ try{ localStorage.setItem(LOCAL_KEY+'_t','1'); localStorage.removeItem(LOCAL_KEY+'_t'); return true; }catch(e){ return false; } })();
+const canAutoSave = hasCloud || hasLocal;
+function localSave(){
+  /* party가 비어 있으면 아직 시작 전(타이틀) — 기존 저장을 덮어쓰지 않는다 */
+  if(!hasLocal || G.party.length===0) return;
+  try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(G)); }catch(e){}
+}
+function localLoadCheck(){
+  if(hasCloud || !hasLocal) return;
+  try{
+    const raw = localStorage.getItem(LOCAL_KEY);
+    if(!raw) return;
+    const obj = JSON.parse(raw);
+    if(obj && (obj.v===2||obj.v===3) && Array.isArray(obj.party)) cloudSaveData = migrateSave(obj);
+  }catch(e){ /* 손상된 캐시는 무시 */ }
+}
+
 async function cloudSave(force){
   if(!hasCloud || !G.name) return;
   const now = Date.now();
@@ -541,6 +561,7 @@ function paint(lines, choices, fx){
 /* ════════════════ 화면 라우터 ════════════════ */
 function render(){
   if(bossMode){ paintBossSheet(); return; }
+  localSave();
   const map = { title:scrTitle, starter:scrStarter, hub:scrHub, explore:scrExplore,
     battle:scrBattle, bag:scrBag, party:scrParty, box:scrBox, dex:scrDex, shop:scrShop,
     moveFloor:scrMoveFloor, storyBeat:scrStoryBeat, gameover:scrGameover, ending:scrEnding,
@@ -564,6 +585,9 @@ function scrTitle(){
   ];
   if(hasCloud){
     lines.push(['※ 진행 상황은 자동 저장됩니다. 랭킹 보드의 이름·기록은 함께 플레이하는 모두에게 공개됩니다.','dim']);
+  } else if(hasLocal){
+    lines.push(['✔ 진행 상황은 이 브라우저의 로컬 캐시에 자동 저장됩니다.','dim']);
+    lines.push(['  (캐시 삭제·다른 기기로 이동할 때를 대비해 [백업 코드]도 가끔 발급해 보관하세요)','dim']);
   } else {
     lines.push(['⚠ 이 게임은 자동 저장되지 않습니다! 메뉴의 [백업 코드]가 유일한 저장 수단입니다.','hl']);
     lines.push(['  (새로고침·창 닫기 시 진행이 사라지니, 수시로 코드를 발급해 메모장에 보관하세요)','dim']);
@@ -576,6 +600,7 @@ function scrTitle(){
       G = d;
       if(!G.name) G.name = '사원'+Math.floor(Math.random()*900+100);
       if(G.screen==='battle'||G.screen==='storyBeat'||G.screen==='rank') G.screen='hub';
+      G.battle = null;
       pendingMsg.push('자동 저장된 진행 상황을 불러왔다!');
       render();
     }]);
@@ -676,7 +701,7 @@ function scrHub(){
     ['몬스터 도감', ()=>{ G.screen='dex'; render(); }],
   );
   if(hasCloud) choices.push(['사내 랭킹 보드', ()=>{ G.screen='rank'; render(); }]);
-  choices.push([hasCloud?'백업 코드 (저장/불러오기)':'백업 코드 (저장/불러오기) — ⚠ 유일한 저장 수단', openSaveDlg]);
+  choices.push([canAutoSave?'백업 코드 (저장/불러오기 · 기기 이동용)':'백업 코드 (저장/불러오기) — ⚠ 유일한 저장 수단', openSaveDlg]);
   paint(lines, choices, `=NOW() · ${fl.name}`);
 }
 
@@ -986,7 +1011,7 @@ function onTrainerMonDown(){
     b.over=true; G.wins++;
     G.money += B.reward;
     pushLog(`★ ${B.name}에게 승리! 보상 ${B.reward}P!`);
-    if(!hasCloud) pushLog('💾 큰 진행을 했다! [백업 코드]를 발급해 보관해 두자.');
+    if(!canAutoSave) pushLog('💾 큰 진행을 했다! [백업 코드]를 발급해 보관해 두자.');
     if(b.bossIdx===G.story){
       G.story++;
       if(G.story===5){ setTimeout(()=>{ G.screen='ending'; render(); },40); return; }
@@ -1030,7 +1055,7 @@ function throwClip(gold){
     else { G.box.push(e); pushLog('파티가 가득 차서 보관함으로 이동했다.'); }
     dexCatch(e.sid, e.rar);
     if(e.trait) pushLog(`특성 [${e.trait}] — ${TRAITS[e.trait]}`);
-    if(!hasCloud && RARITY[e.rar||'normal'].rank>=2) pushLog('💾 희귀 개체 획득! 잃기 전에 [백업 코드]를 발급해 두자.');
+    if(!canAutoSave && RARITY[e.rar||'normal'].rank>=2) pushLog('💾 희귀 개체 획득! 잃기 전에 [백업 코드]를 발급해 두자.');
     b.over=true;
   } else {
     pushLog(`아깝다! ${monName(e)}이(가) 클립을 튕겨냈다!`);
@@ -1151,7 +1176,8 @@ function scrEnding(){
     ['야근차원에서는 부장드래곤이 야생 개체로 드물게 출현해 포획할 수 있다.','hl'],
     '그리고 가장 깊은 곳에는… 회장봉황이 기다린다.',
   ];
-  if(!hasCloud) lines.push('',['⚠ 자동 저장이 없는 환경입니다. 지금 바로 백업 코드를 발급해 보관하세요!','hl']);
+  if(!canAutoSave) lines.push('',['⚠ 자동 저장이 없는 환경입니다. 지금 바로 백업 코드를 발급해 보관하세요!','hl']);
+  else if(!hasCloud) lines.push('',['💾 이 브라우저에 자동 저장 중 — 기기를 옮길 계획이 있다면 백업 코드를 발급해 두세요.','dim']);
   paint(lines,[
     ['계속 모험한다', ()=>{ G.screen='storyBeat'; storyBeatNext='hub'; render(); }],
     ['백업 코드 발급 (저장)', openSaveDlg],
@@ -1263,6 +1289,7 @@ document.addEventListener('keydown', e=>{
 
 render();
 cloudLoadCheck();
+localLoadCheck();
 </script>
 </body>
 </html>
