@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>월별데이터_정리_v7_진짜최종.xlsx - Excel</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; }
+  body {
+    font-family:'맑은 고딕','Malgun Gothic',Calibri,sans-serif;
+    font-size:12px; background:#e6e6e6; color:#222;
+    display:flex; flex-direction:column; overflow:hidden; user-select:none;
+  }
+  .titlebar { background:#217346; color:#fff; height:28px; display:flex; align-items:center; padding:0 8px; font-size:12px; flex-shrink:0; }
+  .titlebar .xicon { background:#fff; color:#217346; font-weight:bold; font-size:11px; width:16px; height:16px; display:flex; align-items:center; justify-content:center; margin-right:8px; border-radius:2px; }
+  .titlebar .tname { flex:1; text-align:center; opacity:.95; }
+  .titlebar .winbtns span { margin-left:14px; opacity:.85; cursor:default; }
+  .ribbontabs { background:#217346; display:flex; padding:0 4px; flex-shrink:0; }
+  .ribbontabs div { color:#fff; padding:6px 12px 7px; font-size:12px; cursor:default; }
+  .ribbontabs div.active { background:#f3f2f1; color:#217346; border-radius:2px 2px 0 0; }
+  .ribbon { background:#f3f2f1; border-bottom:1px solid #d4d4d4; height:60px; display:flex; align-items:center; padding:0 12px; gap:18px; flex-shrink:0; color:#444; }
+  .rgroup { display:flex; flex-direction:column; align-items:center; gap:2px; font-size:10px; color:#888; }
+  .rgroup .ritems { display:flex; gap:8px; font-size:11px; color:#333; }
+  .rgroup .ritems span { padding:3px 6px; cursor:default; border-radius:2px; }
+  .rgroup .ritems span:hover { background:#e2e2e2; }
+  .formulabar { background:#fff; border-bottom:1px solid #d4d4d4; display:flex; align-items:center; height:24px; flex-shrink:0; }
+  .namebox { width:80px; border-right:1px solid #d4d4d4; padding:0 8px; font-size:12px; color:#333; height:100%; display:flex; align-items:center; }
+  .fx { color:#888; font-style:italic; padding:0 8px; border-right:1px solid #e0e0e0; height:100%; display:flex; align-items:center; }
+  .fcontent { padding:0 8px; color:#333; white-space:nowrap; overflow:hidden; }
+  .sheetwrap { flex:1; overflow:auto; background:#fff; position:relative; }
+  table.sheet { border-collapse:collapse; table-layout:fixed; }
+  table.sheet th { background:#f3f2f1; border:1px solid #d4d4d4; font-weight:normal; color:#444; font-size:11px; height:20px; position:sticky; z-index:2; }
+  table.sheet th.colhead { top:0; width:92px; }
+  table.sheet th.rowhead { left:0; width:34px; z-index:3; }
+  table.sheet th.corner { top:0; left:0; z-index:4; width:34px; }
+  table.sheet td { border:1px solid #e2e2e2; height:20px; padding:0 4px; font-size:12px; white-space:nowrap; overflow:visible; vertical-align:middle; cursor:cell; position:relative; }
+  table.sheet td.num { text-align:right; }
+  table.sheet td.choice { color:#1a56b0; cursor:pointer; }
+  table.sheet td.choice:hover { text-decoration:underline; background:#f0f6ff; }
+  table.sheet td.bold { font-weight:bold; }
+  table.sheet td.dim { color:#999; }
+  table.sheet td.hl { background:#fff7d1; }
+  table.sheet td.gold { background:#fff3c4; color:#8a6d00; font-weight:bold; }
+  table.sheet td.hdr { background:#dce6f1; font-weight:bold; border-color:#b8cce4; }
+  table.sheet td.selected { outline:2px solid #217346; outline-offset:-1px; }
+  .sheettabs { background:#f3f2f1; border-top:1px solid #d4d4d4; height:25px; display:flex; align-items:flex-end; padding-left:30px; flex-shrink:0; }
+  .sheettabs .stab { padding:4px 14px; font-size:11px; color:#444; border:1px solid #d4d4d4; border-bottom:none; background:#e9e9e9; cursor:default; }
+  .sheettabs .stab.active { background:#fff; color:#217346; font-weight:bold; }
+  .sheettabs .plus { padding:4px 8px; color:#666; }
+  .statusbar { background:#217346; color:#fff; height:22px; font-size:11px; display:flex; align-items:center; padding:0 12px; flex-shrink:0; }
+  .statusbar .right { margin-left:auto; display:flex; gap:16px; opacity:.9; }
+  .hint { opacity:.75; margin-left:18px; }
+  /* 가짜 엑셀 대화상자 (저장/불러오기) */
+  .xlsdialog { position:fixed; inset:0; background:rgba(0,0,0,.25); display:none; align-items:center; justify-content:center; z-index:50; }
+  .xlsdialog.show { display:flex; }
+  .xlsdialog .box { background:#f3f2f1; border:1px solid #8a8a8a; box-shadow:2px 4px 14px rgba(0,0,0,.3); width:480px; }
+  .xlsdialog .dtitle { background:#fff; border-bottom:1px solid #d4d4d4; padding:8px 12px; font-size:12px; display:flex; }
+  .xlsdialog .dtitle .x { margin-left:auto; cursor:pointer; color:#666; padding:0 4px; }
+  .xlsdialog .dbody { padding:14px; font-size:12px; }
+  .xlsdialog textarea { width:100%; height:110px; margin-top:8px; font-family:Consolas,monospace; font-size:11px; border:1px solid #aaa; padding:6px; resize:none; user-select:text; }
+  .xlsdialog .dbtns { display:flex; justify-content:flex-end; gap:8px; padding:10px 14px 14px; }
+  .xlsdialog button { padding:5px 18px; font-size:12px; border:1px solid #8a8a8a; background:#fdfdfd; cursor:pointer; }
+  .xlsdialog button:hover { background:#e8f0e9; border-color:#217346; }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+  <div class="xicon">X</div>
+  <div>자동 저장 <span style="opacity:.7">●</span> 끔</div>
+  <div class="tname">월별데이터_정리_v7_진짜최종.xlsx - Excel</div>
+  <div class="winbtns"><span>—</span><span>□</span><span>✕</span></div>
+</div>
+
+<div class="ribbontabs">
+  <div>파일</div><div class="active">홈</div><div>삽입</div><div>페이지 레이아웃</div>
+  <div>수식</div><div>데이터</div><div>검토</div><div>보기</div><div>도움말</div>
+</div>
+
+<div class="ribbon">
+  <div class="rgroup"><div class="ritems"><span>붙여넣기</span></div><div>클립보드</div></div>
+  <div class="rgroup"><div class="ritems"><span>맑은 고딕</span><span>11</span><span><b>가</b></span><span><i>가</i></span><span><u>가</u></span></div><div>글꼴</div></div>
+  <div class="rgroup"><div class="ritems"><span>≡</span><span>≣</span><span>≡</span><span>병합하고 가운데 맞춤</span></div><div>맞춤</div></div>
+  <div class="rgroup"><div class="ritems"><span>일반</span><span>%</span><span>,</span></div><div>표시 형식</div></div>
+  <div class="rgroup"><div class="ritems"><span>조건부 서식</span><span>표 서식</span></div><div>스타일</div></div>
+</div>
+
+<div class="formulabar">
+  <div class="namebox" id="namebox">B2</div>
+  <div class="fx">fx</div>
+  <div class="fcontent" id="fxcontent"></div>
+</div>
+
+<div class="sheetwrap"><table class="sheet" id="sheet"></table></div>
+
+<div class="sheettabs">
+  <div class="stab">요약</div>
+  <div class="stab active">월별데이터</div>
+  <div class="stab">참고자료</div>
+  <div class="plus">＋</div>
+</div>
+
+<div class="statusbar">
+  <div id="statustext">준비</div>
+  <div class="hint">ESC: 빠른 시트 전환 · 숫자키: 선택</div>
+  <div class="right"><span>평균: -</span><span>개수: -</span><span>합계: -</span><span>100%</span></div>
+</div>
+
+<!-- 저장/불러오기 위장 대화상자 -->
+<div class="xlsdialog" id="dlg">
+  <div class="box">
+    <div class="dtitle"><span id="dlgtitle">이름 정의</span><span class="x" onclick="closeDlg()">✕</span></div>
+    <div class="dbody">
+      <div id="dlgdesc"></div>
+      <textarea id="dlgtext" spellcheck="false"></textarea>
+    </div>
+    <div class="dbtns">
+      <button id="dlgok">확인</button>
+      <button onclick="closeDlg()">취소</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════ 그리드 엔진 ════════════════ */
+const COLS = 11, ROWS = 32;
+const colName = i => String.fromCharCode(65+i);
+const sheetEl = document.getElementById('sheet');
+let cells = [];
+
+(function buildGrid(){
+  let html = '<tr><th class="corner"></th>';
+  for(let c=0;c<COLS;c++) html += `<th class="colhead">${colName(c)}</th>`;
+  html += '</tr>';
+  for(let r=1;r<=ROWS;r++){
+    html += `<tr><th class="rowhead">${r}</th>`;
+    for(let c=0;c<COLS;c++) html += `<td data-r="${r}" data-c="${c}"></td>`;
+    html += '</tr>';
+  }
+  sheetEl.innerHTML = html;
+  cells = Array.from({length:ROWS+1},()=>[]);
+  sheetEl.querySelectorAll('td').forEach(td=>{
+    cells[+td.dataset.r][+td.dataset.c] = td;
+    td.addEventListener('click', ()=>{
+      document.querySelectorAll('td.selected').forEach(x=>x.classList.remove('selected'));
+      td.classList.add('selected');
+      document.getElementById('namebox').textContent = colName(+td.dataset.c)+td.dataset.r;
+      document.getElementById('fxcontent').textContent = td.textContent;
+    });
+  });
+})();
+
+function clearGrid(){
+  sheetEl.querySelectorAll('td').forEach(td=>{ td.textContent=''; td.className=''; td.onclick=null; });
+}
+function setCell(r,c,text,cls,onclick){
+  if(r>ROWS||c>=COLS||r<1) return;
+  const td = cells[r][c];
+  td.textContent = text;
+  if(cls) td.className = cls;
+  if(onclick){ td.classList.add('choice'); td.onclick = e=>{ e.stopPropagation(); onclick(); }; }
+}
+function setStatus(t){ document.getElementById('statustext').textContent = t; }
+function setFx(t){ document.getElementById('fxcontent').textContent = t; }
+
+/* ════════════════ 데이터: 타입/기술/종족 ════════════════ */
+const TRIANGLE = { '카페인':'서류', '서류':'전자', '전자':'카페인' };
+function typeMult(att, def){
+  if(att==='야근' && def!=='야근') return 1.3;
+  if(def==='야근' && att!=='야근') return 1.3;
+  if(TRIANGLE[att]===def) return 1.5;
+  if(TRIANGLE[def]===att) return 0.67;
+  return 1;
+}
+
+/* moves: [습득레벨, 이름, 위력, 타입(null=무속성)] */
+const SPECIES = {
+  /* ── 스타터 3계열 ── */
+  espresso:{ name:'에스프레소냥', type:'카페인', hp:46, atk:11, evo:{lv:12,to:'latte'},
+    moves:[[1,'할퀴기',40,null],[1,'샷 추가',50,'카페인'],[8,'카페인 러시',62,'카페인']] },
+  latte:{ name:'라떼호랑이', type:'카페인', hp:60, atk:14, evo:{lv:20,to:'tripleshot'},
+    moves:[[1,'할퀴기',40,null],[1,'샷 추가',50,'카페인'],[8,'카페인 러시',62,'카페인'],[14,'라떼 아트 슬래시',75,'카페인']] },
+  tripleshot:{ name:'트리플샷라이거', type:'카페인', hp:76, atk:18,
+    moves:[[1,'샷 추가',50,'카페인'],[8,'카페인 러시',62,'카페인'],[14,'라떼 아트 슬래시',75,'카페인'],[20,'트리플샷 캐논',95,'카페인']] },
+  gyeoljae:{ name:'결재매', type:'서류', hp:50, atk:10, evo:{lv:12,to:'gian'},
+    moves:[[1,'쪼기',40,null],[1,'반려 처리',50,'서류'],[8,'서류 폭풍',62,'서류']] },
+  gian:{ name:'기안독수리', type:'서류', hp:66, atk:13, evo:{lv:20,to:'jeongyeol'},
+    moves:[[1,'쪼기',40,null],[1,'반려 처리',50,'서류'],[8,'서류 폭풍',62,'서류'],[14,'삼중 결재 강타',75,'서류']] },
+  jeongyeol:{ name:'전결콘도르', type:'서류', hp:84, atk:16,
+    moves:[[1,'반려 처리',50,'서류'],[8,'서류 폭풍',62,'서류'],[14,'삼중 결재 강타',75,'서류'],[20,'전결 심판',95,'서류']] },
+  wifi:{ name:'와이파이여우', type:'전자', hp:44, atk:12, evo:{lv:12,to:'fiveg'},
+    moves:[[1,'몸통박치기',40,null],[1,'핑 폭격',50,'전자'],[8,'버퍼링 칼날',62,'전자']] },
+  fiveg:{ name:'5G늑대', type:'전자', hp:58, atk:15, evo:{lv:20,to:'gwangran'},
+    moves:[[1,'몸통박치기',40,null],[1,'핑 폭격',50,'전자'],[8,'버퍼링 칼날',62,'전자'],[14,'기가비트 송곳니',75,'전자']] },
+  gwangran:{ name:'광랜펜리르', type:'전자', hp:72, atk:19,
+    moves:[[1,'핑 폭격',50,'전자'],[8,'버퍼링 칼날',62,'전자'],[14,'기가비트 송곳니',75,'전자'],[20,'풀 대역폭 스트림',95,'전자']] },
+  /* ── 1층 ── */
+  mixrat:{ name:'믹스커피쥐', type:'카페인', hp:38, atk:9, evo:{lv:10,to:'americano'},
+    moves:[[1,'갉기',40,null],[3,'설탕 러시',50,'카페인']] },
+  americano:{ name:'아메리카노쥐', type:'카페인', hp:52, atk:12,
+    moves:[[1,'갉기',40,null],[3,'설탕 러시',50,'카페인'],[11,'얼죽아 블리자드',70,'카페인']] },
+  snackbox:{ name:'과자상자몬', type:'서류', hp:42, atk:8, evo:{lv:10,to:'snackware'},
+    moves:[[1,'박스 어택',40,null],[3,'부스러기 폭풍',50,'서류']] },
+  snackware:{ name:'간식창고몬', type:'서류', hp:60, atk:11,
+    moves:[[1,'박스 어택',40,null],[3,'부스러기 폭풍',50,'서류'],[11,'유통기한 임박 프레스',70,'서류']] },
+  dustbunny:{ name:'먼지토끼', type:'서류', hp:36, atk:10,
+    moves:[[1,'폴짝 박치기',42,null],[4,'재채기 유발',52,'서류'],[12,'백년 묵은 먼지',68,'서류']] },
+  vending:{ name:'자판기골렘', type:'카페인', hp:62, atk:10,
+    moves:[[1,'캔 발사',45,null],[5,'잔돈 안 줌',55,'카페인'],[13,'전 메뉴 투하',72,'카페인']] },
+  /* ── 2층 ── */
+  ghost:{ name:'화이트보드유령', type:'서류', hp:45, atk:10, evo:{lv:13,to:'minutes'},
+    moves:[[1,'지우개 던지기',45,null],[5,'마커 낙서',55,'서류']] },
+  minutes:{ name:'회의록망령', type:'서류', hp:62, atk:13,
+    moves:[[1,'지우개 던지기',45,null],[5,'마커 낙서',55,'서류'],[14,'무한 회의 소환',74,'서류']] },
+  beambat:{ name:'빔프로젝터박쥐', type:'전자', hp:40, atk:11, evo:{lv:13,to:'screenvamp'},
+    moves:[[1,'날개치기',42,null],[5,'눈뽕 광선',55,'전자']] },
+  screenvamp:{ name:'스크린뱀파이어', type:'전자', hp:56, atk:14,
+    moves:[[1,'날개치기',42,null],[5,'눈뽕 광선',55,'전자'],[14,'풀스크린 암전',74,'전자']] },
+  copytoad:{ name:'복사기두꺼비', type:'전자', hp:48, atk:10, evo:{lv:14,to:'duplextoad'},
+    moves:[[1,'혀 채찍',44,null],[6,'토너 분사',56,'전자']] },
+  duplextoad:{ name:'양면인쇄두꺼비왕', type:'전자', hp:66, atk:13,
+    moves:[[1,'혀 채찍',44,null],[6,'토너 분사',56,'전자'],[15,'200매 연속 출력',76,'전자']] },
+  shredgator:{ name:'파쇄기악어', type:'서류', hp:50, atk:12,
+    moves:[[1,'물어뜯기',46,null],[6,'세절 소용돌이',58,'서류'],[14,'기밀문서 분쇄',74,'서류']] },
+  /* ── 3층 ── */
+  cardninja:{ name:'명함닌자', type:'서류', hp:46, atk:12, evo:{lv:15,to:'salesking'},
+    moves:[[1,'명함 수리검',46,null],[7,'인맥 그물',58,'서류']] },
+  salesking:{ name:'영업왕닌자', type:'서류', hp:62, atk:15,
+    moves:[[1,'명함 수리검',46,null],[7,'인맥 그물',58,'서류'],[16,'계약 도장 난무',78,'서류']] },
+  bellcicada:{ name:'전화벨매미', type:'전자', hp:42, atk:13,
+    moves:[[1,'고음 공격',46,null],[7,'부재중 폭탄',58,'전자'],[15,'전화 돌려막기',76,'전자']] },
+  pigeon:{ name:'비둘기 대리', type:'서류', hp:50, atk:11, evo:{lv:15,to:'pigeonmgr'},
+    moves:[[1,'부리 결재',45,null],[7,'보고서 투하',57,'서류']] },
+  pigeonmgr:{ name:'비둘기 과장', type:'서류', hp:68, atk:14,
+    moves:[[1,'부리 결재',45,null],[7,'보고서 투하',57,'서류'],[16,'옥상 호출',78,'서류']] },
+  /* ── 지하 ── */
+  lansnake:{ name:'랜선뱀', type:'전자', hp:46, atk:13, evo:{lv:16,to:'anaconda'},
+    moves:[[1,'휘감기',46,null],[8,'패킷 폭주',58,'전자']] },
+  anaconda:{ name:'광케이블아나콘다', type:'전자', hp:64, atk:16,
+    moves:[[1,'휘감기',46,null],[8,'패킷 폭주',58,'전자'],[17,'기가 조이기',80,'전자']] },
+  fandrone:{ name:'팬소음드론', type:'전자', hp:44, atk:12,
+    moves:[[1,'프로펠러',46,null],[8,'소음 공해',58,'전자'],[16,'풀로드 폭주',76,'전자']] },
+  docslime:{ name:'곰팡이문서슬라임', type:'서류', hp:52, atk:11, evo:{lv:16,to:'slimeking'},
+    moves:[[1,'끈적 공격',46,null],[8,'10년치 서류 압사',58,'서류']] },
+  slimeking:{ name:'기밀문서슬라임킹', type:'서류', hp:72, atk:14,
+    moves:[[1,'끈적 공격',46,null],[8,'10년치 서류 압사',58,'서류'],[17,'대외비 해일',80,'서류']] },
+  /* ── 야근차원 (엔딩 후) ── */
+  nightghost:{ name:'야근유령', type:'야근', hp:55, atk:15,
+    moves:[[1,'한숨',50,null],[10,'카톡 업무지시',62,'야근'],[18,'새벽 메일',82,'야근']] },
+  deadlinegolem:{ name:'마감골렘', type:'야근', hp:75, atk:14,
+    moves:[[1,'돌주먹',50,null],[10,'데드라인 압박',62,'야근'],[18,'기한 엄수 해머',82,'야근']] },
+  mondaybeast:{ name:'월요일괴수', type:'야근', hp:65, atk:16,
+    moves:[[1,'출근 발톱',52,null],[10,'주말 삭제',64,'야근'],[18,'월요병 브레스',84,'야근']] },
+  /* ── 전설 ── */
+  dragon:{ name:'부장드래곤', type:'야근', hp:110, atk:17, legend:true,
+    moves:[[1,'호통',52,null],[1,'결재 반려 폭풍',64,'서류'],[15,'주말 출근 브레스',80,'야근'],[20,'정신력 운운',96,'야근']] },
+  phoenix:{ name:'회장봉황', type:'야근', hp:130, atk:19, legend:true,
+    moves:[[1,'경영 철학 설파',56,null],[1,'창업 정신 화염',70,'야근'],[20,'구조조정 날개',88,'야근'],[24,'레거시의 불꽃',100,'야근']] },
+};
+const ALL_SIDS = Object.keys(SPECIES);
+
+/* ════════════════ 데이터: 층/구역/보스/스토리 ════════════════ */
+const FLOORS = [
+  { name:'1층 (로비)', areas:[
+      { name:'탕비실', lv:[2,4], pool:['mixrat','snackbox'], flavor:'커피 냄새가 진동한다. 누가 마지막 믹스커피를 가져갔을까…' },
+      { name:'로비 구석', lv:[3,5], pool:['dustbunny','vending'], flavor:'화분 뒤 그늘에서 부스럭거리는 소리가 난다.' },
+    ], boss:0 },
+  { name:'2층 (회의실 구역)', areas:[
+      { name:'대회의실', lv:[5,7], pool:['ghost','beambat'], flavor:'아무도 없는데 화이트보드에 글씨가 늘어나고 있다.' },
+      { name:'복사실', lv:[6,8], pool:['copytoad','shredgator'], flavor:'복사기가 혼자 켜져 있다. 토너 경고등이 깜빡인다.' },
+    ], boss:1 },
+  { name:'3층 (영업부)', areas:[
+      { name:'영업부 사무실', lv:[8,10], pool:['cardninja','bellcicada'], flavor:'책상마다 명함이 수북하다. 어딘가에서 전화벨이 끝없이 울린다.' },
+      { name:'옥상', lv:[9,11], pool:['pigeon','vending'], flavor:'바람이 분다. 비둘기들이 묘하게 직급이 있어 보인다.' },
+    ], boss:2 },
+  { name:'지하 (전산/문서고)', areas:[
+      { name:'서버실', lv:[11,13], pool:['lansnake','fandrone'], flavor:'윙윙거리는 소음 속, 랜선 다발이 꿈틀거린 것 같다.' },
+      { name:'문서고', lv:[12,14], pool:['docslime','dustbunny'], flavor:'10년 묵은 서류 더미. 곰팡이 냄새 사이로 뭔가 움직인다.' },
+    ], boss:3 },
+  { name:'꼭대기층 (임원실)', areas:[
+      { name:'임원실 복도', lv:[13,15], pool:['pigeonmgr','minutes'], flavor:'붉은 카펫. 공기가 무겁다. 야근의 기운이 가장 짙은 곳.' },
+    ], boss:4 },
+  { name:'?? 야근차원', areas:[
+      { name:'야근차원 입구', lv:[16,19], pool:['nightghost','deadlinegolem'], flavor:'시계가 전부 밤 11시에 멈춰 있다. 형광등이 윙윙거린다.' },
+      { name:'야근차원 심층부', lv:[19,23], pool:['mondaybeast','nightghost','deadlinegolem'], flavor:'달력이 전부 월요일이다. 이곳의 몬스터는 강하다.' },
+    ], boss:5 },
+];
+
+const BOSSES = [
+  { name:'경비반장 황씨', pre:'"신입이 몬스터를 데리고 다닌다고? 2층은 못 올라간다!"',
+    party:[['vending',6],['snackbox',6]], reward:300,
+    win:'"…제법이군. 올라가 봐. 2층 회의실 쪽이 요즘 시끄럽다."' },
+  { name:'만년과장 김부재', pre:'"회의 중이야. 아니, 회의가 나를 하고 있는 건가…? 덤벼!"',
+    party:[['ghost',9],['copytoad',9]], reward:600,
+    win:'"후련하다… 회의록의 저주가 풀렸어. 3층 영업부를 조심해."' },
+  { name:'영업왕 박차장', pre:'"명함 한 장 받지? 아 참, 그 전에 실력부터 보자고!"',
+    party:[['cardninja',12],['pigeon',12],['beambat',11]], reward:1000,
+    win:'"계약 성립! 자네 실력은 진짜야. 지하 전산실 열쇠를 주지."' },
+  { name:'전산실장 서버수호자', pre:'"여기서부터는 관리자 권한이 필요하다. 인증을 시작하지."',
+    party:[['lansnake',15],['docslime',14],['fandrone',15]], reward:1500,
+    win:'"인증 완료… 꼭대기층 엘리베이터를 활성화했다. 야근의 근원이 거기 있다."' },
+  { name:'부장드래곤', pre:'"정시퇴근…? 나 때는 말이야!!" 거대한 그림자가 일어선다!',
+    party:[['pigeonmgr',16],['dragon',17]], reward:3000,
+    win:'부장드래곤이 쓰러지며 중얼거렸다. "…오늘은… 다들 정시 퇴근해라…"' },
+  { name:'회장봉황', pre:'야근차원 가장 깊은 곳. 황금빛 날개가 펼쳐진다. "젊은 친구, 회사가 뭐라고 생각하나."',
+    party:[['deadlinegolem',22],['mondaybeast',22],['phoenix',24]], reward:9999,
+    win:'회장봉황이 고개를 끄덕였다. "…자네 같은 사원이 있어 회사가 돌아가는 거였군. 졌네."' },
+];
+
+const STORY = [
+  ['제1장 — 수상한 입사 첫 주','책상 서랍에서 발견한 낡은 메모: "야근의 기운이 쌓인 곳에 몬스터가 깨어난다.','근원을 끊는 자, 정시퇴근을 얻으리라." …일단 1층부터 조사해 보자.'],
+  ['제2장 — 회의실의 괴담','경비반장이 길을 열어 주었다. 2층에서는 "끝나지 않는 회의"의 소문이 돈다.','회의실과 복사실을 조사하자.'],
+  ['제3장 — 영업부의 제왕','회의록의 저주가 풀렸다. 3층 영업부에는 몬스터를 부리는 강자가 있다고 한다.','옥상의 비둘기들도 심상치 않다.'],
+  ['제4장 — 지하의 수호자','영업왕에게 인정받았다. 야근 기운의 출처는 지하 전산실 너머라는 정보를 얻었다.','관리자 인증을 돌파하자.'],
+  ['최종장 — 야근의 근원','엘리베이터가 꼭대기층으로 향한다. 모든 야근의 근원, 부장드래곤이 기다린다.','파티를 정비하고 도전하자.'],
+  ['에필로그 — 야근차원','부장드래곤이 정화되자 사무실 한구석에 균열이 열렸다. 그 안은… 야근차원.','강력한 몬스터들과 전설의 존재가 잠들어 있다. (부장드래곤도 야생에서 드물게 출현!)'],
+  ['진엔딩 달성!','회장봉황까지 인정한 전설의 사원. 이제 남은 것은 도감 완성과 황금 몬스터 수집뿐.','당신의 정시퇴근을 응원합니다.'],
+];
+
+/* ════════════════ 몬스터 생성/성장 ════════════════ */
+function statsFor(sid, lv, gold){
+  const s = SPECIES[sid];
+  const mult = gold ? 1.15 : 1;
+  return {
+    maxhp: Math.round((s.hp + (lv-1)*6) * mult),
+    atk: Math.round(s.atk * (1+0.08*(lv-1)) * mult),
+  };
+}
+function makeMon(sid, lv, gold){
+  const st = statsFor(sid, lv, gold);
+  return { sid, lv, gold:!!gold, maxhp:st.maxhp, hp:st.maxhp, atk:st.atk, exp:0 };
+}
+function monName(m){ return (m.gold?'황금 ':'') + SPECIES[m.sid].name; }
+function monType(m){ return SPECIES[m.sid].type; }
+function knownMoves(m){
+  return SPECIES[m.sid].moves.filter(mv=>mv[0]<=m.lv).slice(-4);
+}
+function expNeed(lv){ return lv*22; }
+
+/* ════════════════ 게임 상태 ════════════════ */
+let G = null;
+function newGame(){
+  G = {
+    v:2, screen:'title', name:'',
+    party:[], box:[], active:0,
+    items:{ clip:5, goldclip:0, bacchus:3, hotsix:0, coffee:0 },
+    money:200, wins:0, story:0,
+    dex:{}, goldDex:{}, dexRewards:[],
+    battle:null, log:[], floor:0,
+  };
+}
+newGame();
+
+const ITEM_DEF = {
+  clip:    { name:'집게클립',  desc:'야생 몬스터 포획', price:50 },
+  goldclip:{ name:'골드클립',  desc:'포획률 1.6배', price:140 },
+  bacchus: { name:'박카스',    desc:'HP 35 회복', price:70 },
+  hotsix:  { name:'핫식스',    desc:'HP 완전 회복', price:180 },
+  coffee:  { name:'모닝커피',  desc:'기절 회복 (HP 50%)', price:220 },
+};
+
+function activeMon(){ return G.party[G.active]; }
+function aliveMons(){ return G.party.filter(m=>m.hp>0); }
+function dexSee(sid){ if(!G.dex[sid]) G.dex[sid]=1; }
+function dexCatch(sid, gold){
+  G.dex[sid]=2;
+  if(gold) G.goldDex[sid]=true;
+  checkDexRewards();
+}
+function dexCaughtCount(){ return ALL_SIDS.filter(s=>G.dex[s]===2).length; }
+function checkDexRewards(){
+  const n = dexCaughtCount();
+  const tiers = [
+    [8,  ()=>{ G.items.goldclip+=3; return '도감 8종 달성! 보상: 골드클립 ×3'; }],
+    [16, ()=>{ G.items.hotsix+=2;  return '도감 16종 달성! 보상: 핫식스 ×2'; }],
+    [24, ()=>{ G.items.coffee+=2; G.money+=1000; return '도감 24종 달성! 보상: 모닝커피 ×2, 1000P'; }],
+    [30, ()=>{ G.items.goldclip+=5; G.money+=2000; return '도감 30종 달성! 보상: 골드클립 ×5, 2000P'; }],
+    [ALL_SIDS.length, ()=>{ G.money+=9999; return '★ 도감 완성!! 전설의 수집가! 보상: 9999P ★'; }],
+  ];
+  for(const [t,fn] of tiers){
+    if(n>=t && !G.dexRewards.includes(t)){
+      G.dexRewards.push(t);
+      pendingMsg.push(fn());
+    }
+  }
+}
+let pendingMsg = [];
+
+/* ════════════════ 클라우드 저장 + 공유 랭킹 (아티팩트 배포 시) ════════════════ */
+const hasCloud = (typeof window!=='undefined') && !!window.storage;
+let cloudSaveData = null, lastCloudSave = 0, lastBoardSave = 0;
+
+async function cloudSave(force){
+  if(!hasCloud || !G.name) return;
+  const now = Date.now();
+  if(!force && now-lastCloudSave<4000) return;
+  lastCloudSave = now;
+  try{ await window.storage.set('savegame', JSON.stringify(G)); }catch(e){}
+}
+async function cloudLoadCheck(){
+  if(!hasCloud) return;
+  try{
+    const r = await window.storage.get('savegame');
+    if(r && r.value){
+      const obj = JSON.parse(r.value);
+      if(obj && obj.v===2 && Array.isArray(obj.party)) cloudSaveData = obj;
+    }
+  }catch(e){ /* 저장 데이터 없음 */ }
+  if(G.screen==='title' && !bossMode) render();
+}
+async function updateBoard(force){
+  if(!hasCloud || !G.name || G.party.length===0) return;
+  const now = Date.now();
+  if(!force && now-lastBoardSave<8000) return;
+  lastBoardSave = now;
+  try{
+    await window.storage.set('lb:'+G.name, JSON.stringify({
+      name:G.name, wins:G.wins, dex:dexCaughtCount(),
+      gold:Object.keys(G.goldDex).length, story:G.story, ts:Date.now()
+    }), true);
+  }catch(e){}
+}
+
+let rankCache = null;
+async function loadRank(){
+  if(!hasCloud){ rankCache=[]; if(G.screen==='rank') paintRank(); return; }
+  try{
+    const res = await window.storage.list('lb:', true);
+    const rows = [];
+    for(const k of (res && res.keys ? res.keys : []).slice(0,20)){
+      try{
+        const r = await window.storage.get(k, true);
+        if(r && r.value) rows.push(JSON.parse(r.value));
+      }catch(e){}
+    }
+    rows.sort((a,b)=>(b.story-a.story)||(b.dex-a.dex)||(b.wins-a.wins));
+    rankCache = rows;
+  }catch(e){ rankCache = []; }
+  if(G.screen==='rank' && !bossMode) paintRank();
+}
+const PROG_LABEL = ['1장','2장','3장','4장','최종장','엔딩','진엔딩 ★'];
+function paintRank(){
+  clearGrid();
+  setCell(2,1,'― 사내 랭킹 보드 ―  (함께 플레이하는 전원에게 공개)','bold');
+  ['순위','이름','진행도','도감','황금','승수'].forEach((h,i)=>setCell(4,1+i,h,'hdr'));
+  const rows = rankCache||[];
+  rows.slice(0,20).forEach((p,i)=>{
+    const r = 5+i;
+    setCell(r,1,String(i+1),'num');
+    setCell(r,2,p.name, p.name===G.name?'bold':'');
+    setCell(r,3,PROG_LABEL[Math.min(p.story||0,6)]);
+    setCell(r,4,`${p.dex||0}/${ALL_SIDS.length}`,'num');
+    setCell(r,5,String(p.gold||0),'num');
+    setCell(r,6,String(p.wins||0),'num');
+  });
+  if(rows.length===0) setCell(5,1, rankCache===null?'불러오는 중…':'아직 기록이 없다. 첫 번째 전설의 사원이 되자!','dim');
+  setCell(ROWS-1,1,'1. 돌아간다','choice',()=>{ G.screen = G.party.length?'hub':'title'; render(); });
+  if(G.party.length) paintPartyPanel();
+  setFx('=RANK(나, 사내랭킹)');
+}
+function scrRank(){
+  rankCache = null;
+  paintRank();
+  loadRank();
+}
+
+/* ════════════════ 렌더링 공통 ════════════════ */
+function paintPartyPanel(){
+  setCell(2,7,'■ 파티 현황','hdr'); setCell(2,8,'LV','hdr'); setCell(2,9,'HP','hdr'); setCell(2,10,'상태','hdr');
+  G.party.forEach((m,i)=>{
+    const r = 3+i;
+    setCell(r,7,(i===G.active?'▶ ':'')+monName(m), m.gold?'gold':(i===G.active?'bold':''));
+    setCell(r,8,String(m.lv),'num');
+    setCell(r,9,`${m.hp}/${m.maxhp}`,'num');
+    setCell(r,10, m.hp<=0?'기절': m.hp<m.maxhp*0.3?'위험':'정상', m.hp<=0?'dim':'');
+  });
+  let r = 3+G.party.length+1;
+  setCell(r,7,'■ 자산','hdr'); setCell(r,8,'수량','hdr'); r++;
+  setCell(r,7,'복지포인트'); setCell(r,8,G.money.toLocaleString()+'P','num hl'); r++;
+  for(const k of ['clip','goldclip','bacchus','hotsix','coffee']){
+    if(G.items[k]>0 || k==='clip' || k==='bacchus'){
+      setCell(r,7,ITEM_DEF[k].name); setCell(r,8,String(G.items[k]),'num'); r++;
+    }
+  }
+  r++;
+  setCell(r,7,'도감'); setCell(r,8,`${dexCaughtCount()}/${ALL_SIDS.length}`,'num'); r++;
+  setCell(r,7,'승수'); setCell(r,8,String(G.wins),'num');
+}
+
+function paint(lines, choices, fx){
+  clearGrid();
+  let r = 2;
+  for(const ln of lines){
+    if(r>ROWS-2) break;
+    if(typeof ln === 'string') setCell(r,1,ln);
+    else setCell(r,1,ln[0],ln[1]);
+    r++;
+  }
+  r++;
+  choices.forEach((ch,i)=>{
+    if(r>ROWS) return;
+    setCell(r,1,`${i+1}. ${ch[0]}`,'choice',ch[1]);
+    r++;
+  });
+  if(G.screen!=='title') paintPartyPanel();
+  setFx(fx || '');
+}
+
+/* ════════════════ 화면 라우터 ════════════════ */
+function render(){
+  if(bossMode){ paintBossSheet(); return; }
+  const map = { title:scrTitle, starter:scrStarter, hub:scrHub, explore:scrExplore,
+    battle:scrBattle, bag:scrBag, party:scrParty, box:scrBox, dex:scrDex, shop:scrShop,
+    moveFloor:scrMoveFloor, storyBeat:scrStoryBeat, gameover:scrGameover, ending:scrEnding,
+    rank:scrRank };
+  (map[G.screen]||scrHub)();
+}
+
+/* ── 타이틀 / 스타터 ── */
+function scrTitle(){
+  setStatus('준비');
+  const lines = [
+    ['=== 셀 퀘스트 : 오피스 몬스터 도감 ===','bold'],
+    '',
+    '입사 첫 주, 책상 서랍에서 낡은 메모와 집게클립 다발을 발견했다.',
+    '"야근의 기운이 쌓인 곳에 몬스터가 깨어난다.',
+    ' 근원을 끊는 자, 정시퇴근을 얻으리라."',
+    '',
+    ['목표: 5명의 보스를 꺾고, 37종의 몬스터 도감을 완성하라.','hl'],
+    '',
+    ['※ 셀 클릭 또는 숫자키로 진행 · ESC = 위장 시트 전환','dim'],
+  ];
+  if(hasCloud){
+    lines.push(['※ 진행 상황은 자동 저장됩니다. 랭킹 보드의 이름·기록은 함께 플레이하는 모두에게 공개됩니다.','dim']);
+  } else {
+    lines.push(['※ 진행 상황은 [백업 코드]로 저장/복원할 수 있습니다.','dim']);
+  }
+  const choices = [];
+  if(cloudSaveData){
+    const d = cloudSaveData;
+    const dexN = Object.values(d.dex||{}).filter(v=>v===2).length;
+    choices.push([`이어하기 — ${d.name||'사원'} (${PROG_LABEL[Math.min(d.story||0,6)]} · 도감 ${dexN} · 승수 ${d.wins||0})`, ()=>{
+      G = d;
+      if(!G.name) G.name = '사원'+Math.floor(Math.random()*900+100);
+      if(G.screen==='battle'||G.screen==='storyBeat'||G.screen==='rank') G.screen='hub';
+      pendingMsg.push('자동 저장된 진행 상황을 불러왔다!');
+      render();
+    }]);
+  }
+  choices.push(['새 게임 시작', hasCloud?openNameDlg:()=>{ G.screen='starter'; render(); }]);
+  if(hasCloud) choices.push(['랭킹 보드 보기', ()=>{ G.screen='rank'; render(); }]);
+  choices.push(['백업 코드 불러오기', openLoadDlg]);
+  paint(lines, choices, '=GAME.START()');
+}
+
+function openNameDlg(){
+  document.getElementById('dlgtitle').textContent = '시트 사용자 이름';
+  document.getElementById('dlgdesc').textContent = '랭킹 보드에 표시될 이름을 입력하세요. (12자 이내, 모두에게 공개됩니다)';
+  dlgText.value=''; dlgText.onfocus=null;
+  dlgOk.textContent = '입력 후 시작';
+  dlgOk.onclick = ()=>{
+    let n = dlgText.value.trim().replace(/[\s'"\/\\]/g,'').slice(0,12);
+    if(!n) n = '사원'+Math.floor(Math.random()*900+100);
+    const had = cloudSaveData;
+    newGame();
+    G.name = n;
+    cloudSaveData = had; /* 타이틀로 돌아오면 여전히 이어하기 가능 */
+    closeDlg();
+    G.screen='starter';
+    render();
+  };
+  dlg.classList.add('show');
+  dlgText.focus();
+}
+
+function scrStarter(){
+  const pick = sid => () => {
+    G.party=[makeMon(sid,4)];
+    dexCatch(sid,false);
+    G.screen='storyBeat'; storyBeatNext='hub';
+    render();
+  };
+  paint([
+    ['파트너 몬스터를 선택하세요 (셋 다 2번 진화합니다)','bold'],
+    '',
+    '에스프레소냥 (카페인) — 공격적. 잠을 안 잔다. → 라떼호랑이 → 트리플샷라이거',
+    '결재매 (서류) — 단단하다. 모든 걸 반려시킨다. → 기안독수리 → 전결콘도르',
+    '와이파이여우 (전자) — 빠르다. 가끔 끊긴다. → 5G늑대 → 광랜펜리르',
+    '',
+    ['상성: 카페인 > 서류 > 전자 > 카페인 / 야근 타입은 모두에게 강하고 약하다','dim'],
+  ],[
+    ['에스프레소냥을 선택', pick('espresso')],
+    ['결재매를 선택', pick('gyeoljae')],
+    ['와이파이여우를 선택', pick('wifi')],
+  ]);
+}
+
+/* ── 스토리 비트 ── */
+let storyBeatNext = 'hub';
+function scrStoryBeat(){
+  const ch = STORY[Math.min(G.story, STORY.length-1)];
+  const lines = [[ch[0],'bold'],'', ...ch.slice(1)];
+  pendingMsg.forEach(m=>lines.push('',[m,'hl']));
+  pendingMsg = [];
+  paint(lines,[['계속한다', ()=>{ G.screen=storyBeatNext; render(); }]]);
+}
+
+/* ── 허브 ── */
+function scrHub(){
+  setStatus('준비');
+  cloudSave(); updateBoard();
+  if(G.floor > G.story && G.floor < 5) G.floor = Math.min(G.floor, G.story);
+  const fl = FLOORS[G.floor];
+  const ch = STORY[Math.min(G.story, STORY.length-1)];
+  const lines = [
+    [`― ${fl.name} · 내 자리 ―`,'bold'],
+    [ch[0],'dim'],
+    '',
+  ];
+  pendingMsg.forEach(m=>lines.push([m,'hl']));
+  pendingMsg = [];
+  const choices = fl.areas.map(a=>[
+    `${a.name} 탐색 (LV ${a.lv[0]}~${a.lv[1]})`, ()=>startExplore(a)
+  ]);
+  const bossIdx = fl.boss;
+  const bossBeaten = G.story > bossIdx;
+  if(!bossBeaten && bossIdx<=G.story){
+    choices.push([`★ 보스에게 도전: ${BOSSES[bossIdx].name}`, ()=>startBossBattle(bossIdx)]);
+  }
+  if(G.story>=6 && G.floor===5){
+    choices.push(['★ 회장봉황과 재대결 (포획 불가)', ()=>startBossBattle(5)]);
+  }
+  choices.push(
+    ['다른 층으로 이동', ()=>{ G.screen='moveFloor'; render(); }],
+    ['정수기에서 회복 (무료, 전원 완전 회복)', ()=>{
+      G.party.forEach(m=>m.hp=m.maxhp);
+      pendingMsg.push('시원한 물과 함께 파티가 모두 회복되었다!');
+      render();
+    }],
+    ['매점 (복지포인트 사용)', ()=>{ G.screen='shop'; render(); }],
+    ['가방', ()=>{ G.screen='bag'; render(); }],
+    ['파티 관리', ()=>{ G.screen='party'; render(); }],
+    ['몬스터 도감', ()=>{ G.screen='dex'; render(); }],
+  );
+  if(hasCloud) choices.push(['사내 랭킹 보드', ()=>{ G.screen='rank'; render(); }]);
+  choices.push(['백업 코드 (저장/불러오기)', openSaveDlg]);
+  paint(lines, choices, `=NOW() · ${fl.name}`);
+}
+
+function scrMoveFloor(){
+  const unlocked = Math.min(G.story, 4);
+  const lines = [['― 엘리베이터 ―','bold'],'', '어느 층으로 갈까?',''];
+  const choices = [];
+  FLOORS.forEach((f,i)=>{
+    if(i<=unlocked) choices.push([f.name + (i===G.floor?' (현재)':''), ()=>{ G.floor=i; G.screen='hub'; render(); }]);
+    else if(i<5) choices.push([f.name+' — 잠김 (보스를 꺾어야 함)', ()=>{}]);
+  });
+  if(G.story>=5) choices.push(['?? 야근차원 — 사무실 구석의 균열', ()=>{ G.floor=5; G.screen='hub'; render(); }]);
+  choices.push(['돌아간다', ()=>{ G.screen='hub'; render(); }]);
+  paint(lines, choices);
+}
+
+/* ── 가방 / 상점 ── */
+function scrBag(){
+  const lines = [['― 가방 ―','bold'],''];
+  for(const k of Object.keys(ITEM_DEF)){
+    lines.push(`${ITEM_DEF[k].name} ×${G.items[k]} — ${ITEM_DEF[k].desc}`);
+  }
+  lines.push('', `복지포인트: ${G.money.toLocaleString()}P`);
+  const choices = [];
+  if(G.items.coffee>0 && G.party.some(m=>m.hp<=0)){
+    choices.push(['모닝커피 사용 (기절한 몬스터 회복)', ()=>{
+      const m = G.party.find(x=>x.hp<=0);
+      G.items.coffee--; m.hp = Math.ceil(m.maxhp/2);
+      pendingMsg.push(`${monName(m)}이(가) 정신을 차렸다!`);
+      render();
+    }]);
+  }
+  choices.push(['돌아간다', ()=>{ G.screen='hub'; render(); }]);
+  paint(lines, choices);
+}
+
+function scrShop(){
+  const lines = [
+    ['― 매점 (사내 복지몰) ―','bold'],'',
+    `보유 복지포인트: ${G.money.toLocaleString()}P`,
+    '전투에서 이기면 포인트를 받는다. 보스전은 보상이 크다.','',
+  ];
+  const choices = Object.keys(ITEM_DEF).map(k=>{
+    const d = ITEM_DEF[k];
+    return [`${d.name} 구매 — ${d.price}P (보유 ${G.items[k]}) · ${d.desc}`, ()=>{
+      if(G.money>=d.price){ G.money-=d.price; G.items[k]++; setFx(`${d.name} 구매 완료`); }
+      else setFx('포인트가 부족하다…');
+      render();
+    }];
+  });
+  choices.push(['돌아간다', ()=>{ G.screen='hub'; render(); }]);
+  paint(lines, choices);
+}
+
+/* ── 파티 / 보관함 ── */
+function scrParty(){
+  const lines = [['― 파티 관리 ―','bold'],''];
+  G.party.forEach((m,i)=>{
+    lines.push([`${i===G.active?'▶':' '} ${monName(m)}  LV${m.lv} [${monType(m)}]  HP ${m.hp}/${m.maxhp}  공격 ${m.atk}  EXP ${m.exp}/${expNeed(m.lv)}`, m.gold?'gold':'']);
+    lines.push(['    기술: '+knownMoves(m).map(mv=>mv[1]).join(', '),'dim']);
+  });
+  const choices = [];
+  G.party.forEach((m,i)=>{
+    if(i!==G.active && m.hp>0) choices.push([`${monName(m)}을(를) 선두로`, ()=>{ G.active=i; render(); }]);
+  });
+  if(G.party.length>1){
+    choices.push(['몬스터를 보관함으로 보낸다', ()=>{ boxMode='deposit'; G.screen='box'; render(); }]);
+  }
+  choices.push([`보관함 열기 (${G.box.length}마리)`, ()=>{ boxMode='view'; G.screen='box'; render(); }]);
+  choices.push(['돌아간다', ()=>{ G.screen='hub'; render(); }]);
+  paint(lines, choices);
+}
+
+let boxMode = 'view';
+function scrBox(){
+  const lines = [['― 보관함 (사물함) ―','bold'],''];
+  if(boxMode==='deposit'){
+    lines.push('누구를 보관함에 넣을까? (선두 제외)');
+    const choices = [];
+    G.party.forEach((m,i)=>{
+      if(i!==G.active) choices.push([`${monName(m)} LV${m.lv} 보관`, ()=>{
+        G.box.push(m);
+        G.party.splice(i,1);
+        if(G.active>i) G.active--;
+        boxMode='view'; render();
+      }]);
+    });
+    choices.push(['취소', ()=>{ G.screen='party'; render(); }]);
+    paint(lines, choices);
+    return;
+  }
+  if(G.box.length===0) lines.push('보관함이 비어 있다.');
+  else G.box.forEach(m=>lines.push([`· ${monName(m)} LV${m.lv} [${monType(m)}] HP ${m.hp}/${m.maxhp}`, m.gold?'gold':'']));
+  const choices = [];
+  G.box.forEach((m,i)=>{
+    if(G.party.length<4) choices.push([`${monName(m)}을(를) 파티로`, ()=>{
+      G.party.push(m); G.box.splice(i,1); render();
+    }]);
+  });
+  if(G.party.length>=4 && G.box.length>0) lines.push('',['파티가 가득 차서 꺼낼 수 없다. (최대 4마리)','dim']);
+  choices.push(['돌아간다', ()=>{ G.screen='party'; render(); }]);
+  paint(lines, choices);
+}
+
+/* ── 도감 ── */
+function scrDex(){
+  clearGrid();
+  setCell(2,1,`― 오피스 몬스터 도감 ―  등록 ${dexCaughtCount()} / ${ALL_SIDS.length}`,'bold');
+  setCell(3,1,'─ 미확인 / 👁 목격 / ✔ 포획 / ★ 황금 개체 포획','dim');
+  const half = Math.ceil(ALL_SIDS.length/2);
+  ALL_SIDS.forEach((sid,i)=>{
+    const col = i<half ? 1 : 4;
+    const r = 5 + (i%half);
+    const st = G.dex[sid]||0;
+    const no = String(i+1).padStart(2,'0');
+    let mark = '─', name='?????', cls='dim';
+    if(st===1){ mark='👁'; name=SPECIES[sid].name; cls='dim'; }
+    if(st===2){ mark = G.goldDex[sid]?'★':'✔'; name=SPECIES[sid].name; cls = G.goldDex[sid]?'gold':''; }
+    setCell(r,col,`${no}.`,'num dim');
+    setCell(r,col+1,`${mark} ${name}`,cls);
+    if(st>0) setCell(r,col+2,`[${SPECIES[sid].type}]`,'dim');
+  });
+  setCell(ROWS-1,1,'1. 돌아간다','choice',()=>{ G.screen='hub'; render(); });
+  setFx(`=COUNTIF(도감, "포획") → ${dexCaughtCount()}`);
+}
+
+/* ── 탐색 ── */
+let curArea = null, exploreText = [];
+function startExplore(area){
+  curArea = area;
+  const roll = Math.random();
+  if(roll < 0.74){
+    let pool = area.pool.slice();
+    /* 야근차원: 전설 출현 */
+    if(G.floor===5){
+      if(G.story>=5 && Math.random()<0.05) pool=['dragon'];
+      if(G.story>=6 && Math.random()<0.03) pool=['phoenix'];
+    }
+    const sid = pool[Math.floor(Math.random()*pool.length)];
+    const lv = SPECIES[sid].legend
+      ? (sid==='dragon'?18:24)
+      : area.lv[0] + Math.floor(Math.random()*(area.lv[1]-area.lv[0]+1));
+    const gold = !SPECIES[sid].legend && Math.random()<0.06;
+    startWildBattle(makeMon(sid, lv, gold));
+  } else if(roll < 0.90){
+    const pickPool = G.story>=3 ? ['clip','clip','bacchus','goldclip'] : ['clip','clip','bacchus'];
+    const found = pickPool[Math.floor(Math.random()*pickPool.length)];
+    G.items[found]++;
+    G.screen='explore';
+    exploreText = [area.flavor,'',`바닥에서 ${ITEM_DEF[found].name} 1개를 주웠다!`];
+    render();
+  } else {
+    G.screen='explore';
+    exploreText = [area.flavor,'','…아무 일도 일어나지 않았다. 평화로운 직장이다.'];
+    render();
+  }
+}
+function scrExplore(){
+  paint([[`― ${curArea.name} ―`,'bold'],'',...exploreText,''],[
+    ['더 둘러본다', ()=>startExplore(curArea)],
+    ['자리로 돌아간다', ()=>{ G.screen='hub'; render(); }],
+  ]);
+}
+
+/* ════════════════ 전투 ════════════════ */
+function pushLog(s){ G.log.push(s); if(G.log.length>9) G.log.shift(); }
+
+function ensureAliveLead(){
+  if(activeMon().hp<=0){
+    const idx = G.party.findIndex(m=>m.hp>0);
+    if(idx>=0) G.active = idx;
+  }
+}
+
+function startWildBattle(enemy){
+  ensureAliveLead();
+  dexSee(enemy.sid);
+  G.battle = { enemy, wild:true, over:false, menu:'main' };
+  G.log = [`야생의 ${monName(enemy)}(LV${enemy.lv})이(가) 나타났다!`];
+  if(enemy.gold) G.log.push('황금빛으로 빛나고 있다…! (희귀 개체)');
+  if(SPECIES[enemy.sid].legend) G.log.push('압도적인 야근의 기운이 느껴진다…!');
+  G.screen='battle'; render();
+}
+
+function startBossBattle(idx){
+  ensureAliveLead();
+  if(aliveMons().length===0){ pendingMsg.push('싸울 수 있는 몬스터가 없다. 먼저 회복하자.'); render(); return; }
+  const B = BOSSES[idx];
+  const party = B.party.map(([sid,lv])=>makeMon(sid,lv));
+  party.forEach(m=>dexSee(m.sid));
+  G.battle = { enemyParty:party, eIdx:0, enemy:party[0], wild:false, bossIdx:idx, over:false, menu:'main' };
+  G.log = [B.pre, `${B.name}이(가) ${monName(party[0])}을(를) 내보냈다!`];
+  G.screen='battle'; render();
+}
+
+function dmgCalc(attacker, power, moveType, defender){
+  const mult = moveType ? typeMult(moveType, monType(defender)) : 1;
+  const crit = Math.random()<0.08 ? 1.5 : 1;
+  const base = attacker.atk * power/40 * mult * crit * (0.85+Math.random()*0.3);
+  return { val: Math.max(1, Math.round(base)), mult, crit: crit>1 };
+}
+function fxTag(mult, crit){
+  let s='';
+  if(crit) s+=' 급소!';
+  if(mult>1) s+=' (효과 굉장!)'; else if(mult<1) s+=' (효과 별로…)';
+  return s;
+}
+
+function enemyTurn(){
+  const b=G.battle; if(b.over) return;
+  const e=b.enemy, me=activeMon();
+  if(e.hp<=0) return;
+  const mvs = knownMoves(e);
+  const mv = mvs[Math.floor(Math.random()*mvs.length)];
+  const {val,mult,crit} = dmgCalc(e, mv[2], mv[3], me);
+  me.hp = Math.max(0, me.hp - val);
+  pushLog(`${monName(e)}의 ${mv[1]}! ${val} 데미지${fxTag(mult,crit)}`);
+  if(me.hp<=0){
+    pushLog(`${monName(me)}이(가) 기절했다!`);
+    if(aliveMons().length===0){
+      b.over=true;
+      pushLog('더 싸울 몬스터가 없다… 눈앞이 깜깜해졌다.');
+      setTimeout(()=>{ G.screen='gameover'; render(); },40);
+    } else {
+      b.menu='forceSwitch';
+    }
+  }
+}
+
+function grantExpAndMoney(e, moneyMult){
+  const me = activeMon();
+  const exp = e.lv*13;
+  const pay = Math.round(e.lv*15*(e.gold?3:1)*(moneyMult||1));
+  G.money += pay;
+  me.exp += exp;
+  pushLog(`경험치 ${exp}, 복지포인트 ${pay}P 획득!`);
+  while(me.exp >= expNeed(me.lv)){
+    me.exp -= expNeed(me.lv);
+    me.lv++;
+    const before = knownMoves(me).map(m=>m[1]);
+    const st = statsFor(me.sid, me.lv, me.gold);
+    const gain = st.maxhp - me.maxhp;
+    me.maxhp = st.maxhp; me.atk = st.atk;
+    me.hp = Math.min(me.maxhp, me.hp+gain);
+    pushLog(`${monName(me)} 레벨 업! → LV${me.lv}`);
+    const evo = SPECIES[me.sid].evo;
+    if(evo && me.lv>=evo.lv){
+      const oldName = monName(me);
+      me.sid = evo.to;
+      const st2 = statsFor(me.sid, me.lv, me.gold);
+      const ratio = me.hp/me.maxhp;
+      me.maxhp = st2.maxhp; me.atk = st2.atk;
+      me.hp = Math.max(1, Math.round(me.maxhp*ratio));
+      pushLog(`!! ${oldName}이(가) ${monName(me)}(으)로 진화했다 !!`);
+      dexCatch(me.sid, me.gold);
+    }
+    const after = knownMoves(me).map(m=>m[1]);
+    after.filter(n=>!before.includes(n)).forEach(n=>pushLog(`새 기술 [${n}]을(를) 배웠다!`));
+  }
+}
+
+function winWild(){
+  const b=G.battle; b.over=true; G.wins++;
+  pushLog(`${monName(b.enemy)}을(를) 쓰러뜨렸다!`);
+  grantExpAndMoney(b.enemy, 1);
+  if(Math.random()<0.4){
+    const drop = Math.random()<0.6?'clip':'bacchus';
+    G.items[drop]++;
+    pushLog(`${ITEM_DEF[drop].name} 1개를 주웠다!`);
+  }
+}
+
+function onTrainerMonDown(){
+  const b=G.battle, B=BOSSES[b.bossIdx];
+  pushLog(`${monName(b.enemy)}을(를) 쓰러뜨렸다!`);
+  grantExpAndMoney(b.enemy, 1.3);
+  b.eIdx++;
+  if(b.eIdx < b.enemyParty.length){
+    b.enemy = b.enemyParty[b.eIdx];
+    pushLog(`${B.name}이(가) ${monName(b.enemy)}을(를) 내보냈다!`);
+  } else {
+    b.over=true; G.wins++;
+    G.money += B.reward;
+    pushLog(`★ ${B.name}에게 승리! 보상 ${B.reward}P!`);
+    if(b.bossIdx===G.story){
+      G.story++;
+      if(G.story===5){ setTimeout(()=>{ G.screen='ending'; render(); },40); return; }
+      if(G.story===6){ setTimeout(()=>{ G.screen='ending'; render(); },40); return; }
+      b.afterStory = true;
+    }
+  }
+}
+
+function playerMove(mvIdx){
+  const b=G.battle; if(b.over) return;
+  const me=activeMon(), e=b.enemy;
+  const mv = knownMoves(me)[mvIdx];
+  const {val,mult,crit} = dmgCalc(me, mv[2], mv[3], e);
+  e.hp = Math.max(0, e.hp - val);
+  pushLog(`${monName(me)}의 ${mv[1]}! ${val} 데미지${fxTag(mult,crit)}`);
+  if(e.hp<=0){
+    if(b.wild) winWild(); else onTrainerMonDown();
+  } else enemyTurn();
+  b.menu='main';
+  render();
+}
+
+function throwClip(gold){
+  const b=G.battle; if(b.over||!b.wild) return;
+  const key = gold?'goldclip':'clip';
+  if(G.items[key]<=0){ pushLog(`${ITEM_DEF[key].name}이(가) 없다!`); render(); return; }
+  G.items[key]--;
+  const e=b.enemy;
+  let chance = (0.22 + 0.65*(1 - e.hp/e.maxhp)) * (gold?1.6:1);
+  if(e.gold) chance *= 0.75;
+  if(SPECIES[e.sid].legend) chance *= 0.45;
+  if(Math.random()<chance){
+    pushLog(`클립이 ${monName(e)}을(를) 집었다! 포획 성공!!`);
+    e.hp = Math.max(1, e.hp);
+    if(G.party.length<4){ G.party.push(e); pushLog('파티에 합류했다.'); }
+    else { G.box.push(e); pushLog('파티가 가득 차서 보관함으로 이동했다.'); }
+    dexCatch(e.sid, e.gold);
+    b.over=true;
+  } else {
+    pushLog(`아깝다! ${monName(e)}이(가) 클립을 튕겨냈다!`);
+    enemyTurn();
+  }
+  b.menu='main';
+  render();
+}
+
+function useHeal(kind){
+  const b=G.battle; if(b.over) return;
+  const me=activeMon();
+  if(G.items[kind]<=0){ pushLog('아이템이 없다!'); render(); return; }
+  if(me.hp>=me.maxhp){ pushLog('HP가 이미 가득하다!'); render(); return; }
+  G.items[kind]--;
+  if(kind==='bacchus'){ me.hp=Math.min(me.maxhp, me.hp+35); pushLog(`${monName(me)} HP 35 회복!`); }
+  else { me.hp=me.maxhp; pushLog(`${monName(me)} HP 완전 회복!`); }
+  enemyTurn(); b.menu='main'; render();
+}
+
+function tryRun(){
+  const b=G.battle; if(b.over) return;
+  if(!b.wild){ pushLog('보스 앞에서 도망칠 수는 없다…!'); render(); return; }
+  if(Math.random()<0.7){ pushLog('무사히 도망쳤다!'); b.over=true; }
+  else { pushLog('도망칠 수 없었다!'); enemyTurn(); }
+  b.menu='main'; render();
+}
+
+function switchMon(i, free){
+  const b=G.battle;
+  if(G.party[i].hp<=0 || i===G.active) return;
+  G.active=i;
+  pushLog(`가라, ${monName(G.party[i])}!`);
+  if(!free && !b.over) enemyTurn();
+  b.menu='main'; render();
+}
+
+function scrBattle(){
+  setStatus('계산 중...');
+  const b=G.battle, e=b.enemy, me=activeMon();
+  const bossLabel = b.wild ? '' : ` 〔${BOSSES[b.bossIdx].name} ${b.eIdx+1}/${b.enemyParty.length}〕`;
+  const lines = [
+    [`⚔ ${monName(e)}  LV${e.lv}  [${monType(e)}]${bossLabel}`, e.gold?'gold':'bold'],
+    [`   HP ${e.hp}/${e.maxhp}  ${'█'.repeat(Math.ceil(e.hp/e.maxhp*10)).padEnd(10,'░')}`, e.hp<e.maxhp*0.3?'hl':''],
+    '',
+    ...G.log,
+    '',
+  ];
+  let choices = [];
+  if(b.over){
+    const next = b.afterStory
+      ? ()=>{ pendingMsg.push(BOSSES[b.bossIdx].win); G.screen='storyBeat'; storyBeatNext='hub'; render(); }
+      : ()=>{ G.screen='hub'; render(); };
+    if(aliveMons().length>0) choices=[['전투 종료 — 돌아간다', next]];
+  } else if(b.menu==='forceSwitch'){
+    G.party.forEach((m,i)=>{ if(m.hp>0) choices.push([`${monName(m)} 교체 투입 (HP ${m.hp})`, ()=>switchMon(i,true)]); });
+  } else if(b.menu==='moves'){
+    knownMoves(me).forEach((mv,i)=>{
+      choices.push([`${mv[1]} (위력 ${mv[2]}${mv[3]?', '+mv[3]:''})`, ()=>playerMove(i)]);
+    });
+    choices.push(['← 뒤로', ()=>{ b.menu='main'; render(); }]);
+  } else if(b.menu==='bag'){
+    if(b.wild){
+      choices.push([`집게클립 던지기 (${G.items.clip})`, ()=>throwClip(false)]);
+      if(G.items.goldclip>0) choices.push([`골드클립 던지기 (${G.items.goldclip})`, ()=>throwClip(true)]);
+    }
+    choices.push([`박카스 — HP 35 (${G.items.bacchus})`, ()=>useHeal('bacchus')]);
+    if(G.items.hotsix>0) choices.push([`핫식스 — 완전 회복 (${G.items.hotsix})`, ()=>useHeal('hotsix')]);
+    choices.push(['← 뒤로', ()=>{ b.menu='main'; render(); }]);
+  } else if(b.menu==='switch'){
+    G.party.forEach((m,i)=>{
+      if(i!==G.active && m.hp>0) choices.push([`${monName(m)} (HP ${m.hp}/${m.maxhp})`, ()=>switchMon(i,false)]);
+    });
+    choices.push(['← 뒤로', ()=>{ b.menu='main'; render(); }]);
+  } else {
+    choices = [
+      ['공격한다', ()=>{ b.menu='moves'; render(); }],
+      ['가방 (포획/회복)', ()=>{ b.menu='bag'; render(); }],
+    ];
+    if(G.party.filter((m,i)=>i!==G.active&&m.hp>0).length>0)
+      choices.push(['교체한다', ()=>{ b.menu='switch'; render(); }]);
+    choices.push([b.wild?'도망간다':'도망갈 수 없다…', tryRun]);
+  }
+  paint(lines, choices, `=BATTLE("${monName(e)}", ${e.hp})`);
+}
+
+function scrGameover(){
+  G.money = Math.max(0, G.money - Math.floor(G.money*0.1));
+  paint([
+    ['― 의식이 흐려진다… ―','bold'],'',
+    '정신을 차려 보니 탕비실 소파였다.',
+    '누군가 이온음료를 머리맡에 두고 갔다. (복지포인트 10% 분실)',
+    '파티가 모두 회복되었다. 다시 가 보자.',
+  ],[
+    ['일어난다', ()=>{ G.party.forEach(m=>m.hp=m.maxhp); G.screen='hub'; render(); }],
+  ]);
+}
+
+function scrEnding(){
+  cloudSave(true); updateBoard(true);
+  const final = G.story>=6;
+  const lines = final ? [
+    ['★★★ 진엔딩 — 전설의 사원 ★★★','bold'],'',
+    '회장봉황마저 당신을 인정했다. 회사 역사상 최초의 일이다.',
+    '게시판에 공지가 붙었다. "전 직원 주 4일제 시범 도입."','',
+    [`최종 기록 — 승수 ${G.wins} / 도감 ${dexCaughtCount()}/${ALL_SIDS.length} / 황금 ${Object.keys(G.goldDex).length}종`,'hl'],'',
+    '남은 목표: 도감 완성, 황금 개체 수집, 전설 포획(야근차원에서 드물게 출현)',
+  ] : [
+    ['★★★ 엔딩 ★★★','bold'],'',
+    BOSSES[4].win,
+    '사무실에 평화가 찾아왔다. 오피스 몬스터들도 칼퇴를 시작했다.','',
+    '…그런데 사무실 구석에 검은 균열이 열렸다.',
+    ['새 지역 [야근차원]이 해금되었습니다! (엘리베이터에서 이동)','hl'],
+    ['야근차원에서는 부장드래곤이 야생 개체로 드물게 출현해 포획할 수 있다.','hl'],
+    '그리고 가장 깊은 곳에는… 회장봉황이 기다린다.',
+  ];
+  paint(lines,[
+    ['계속 모험한다', ()=>{ G.screen='storyBeat'; storyBeatNext='hub'; render(); }],
+    ['백업 코드 발급 (저장)', openSaveDlg],
+  ],'=GAME.CLEAR()');
+}
+
+/* ════════════════ 저장 / 불러오기 (백업 코드) ════════════════ */
+const dlg = document.getElementById('dlg');
+const dlgText = document.getElementById('dlgtext');
+const dlgOk = document.getElementById('dlgok');
+function closeDlg(){ dlg.classList.remove('show'); }
+
+function encodeSave(){
+  return btoa(unescape(encodeURIComponent(JSON.stringify(G))));
+}
+function decodeSave(code){
+  const obj = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+  if(!obj || obj.v!==2 || !Array.isArray(obj.party)) throw new Error('bad');
+  if(!obj.name) obj.name = '사원'+Math.floor(Math.random()*900+100);
+  return obj;
+}
+function openSaveDlg(){
+  document.getElementById('dlgtitle').textContent = '이름 정의 — 백업';
+  document.getElementById('dlgdesc').textContent = '아래 코드를 복사해 메모장 등에 보관하세요. [확인]을 누르면 불러오기 모드로 전환됩니다.';
+  dlgText.value = encodeSave();
+  dlgText.onfocus = ()=>dlgText.select();
+  dlgOk.textContent = '불러오기로 전환';
+  dlgOk.onclick = openLoadDlg;
+  dlg.classList.add('show');
+  dlgText.focus();
+}
+function openLoadDlg(){
+  document.getElementById('dlgtitle').textContent = '이름 정의 — 복원';
+  document.getElementById('dlgdesc').textContent = '보관해 둔 백업 코드를 붙여넣고 [확인]을 누르세요.';
+  dlgText.value = '';
+  dlgText.onfocus = null;
+  dlgOk.textContent = '확인';
+  dlgOk.onclick = ()=>{
+    try {
+      G = decodeSave(dlgText.value);
+      closeDlg();
+      pendingMsg.push('백업 코드에서 진행 상황을 복원했다!');
+      if(G.screen==='battle'||G.screen==='storyBeat') G.screen='hub';
+      render();
+    } catch(e){
+      document.getElementById('dlgdesc').textContent = '코드를 해석할 수 없습니다. 전체를 정확히 붙여넣었는지 확인하세요.';
+    }
+  };
+  dlg.classList.add('show');
+  dlgText.focus();
+}
+
+/* ════════════════ 보스 키 (ESC 위장 시트) ════════════════ */
+let bossMode = false;
+const FAKE_ROWS = (()=>{
+  const items=['온라인 광고','오프라인 행사','제휴 마케팅','콘텐츠 제작','SNS 운영','검색 광고','뉴스레터','프로모션','인쇄물','기타 경비'];
+  return items.map(n=>{
+    const a=Math.round(3200+Math.random()*4800);
+    const b2=Math.round(a*(0.82+Math.random()*0.3));
+    const c=Math.round(b2*(0.85+Math.random()*0.3));
+    return [n,a,b2,c,a+b2+c];
+  });
+})();
+function paintBossSheet(){
+  clearGrid();
+  setStatus('준비');
+  setFx('=SUM(C4:E4)');
+  setCell(2,1,'2026년 2분기 채널별 집행 비용 (단위: 천원)','bold');
+  ['항목','4월','5월','6월','합계'].forEach((h,i)=>setCell(4,1+i,h,'hdr'));
+  FAKE_ROWS.forEach((row,r)=>{
+    row.forEach((v,c)=>{
+      setCell(5+r,1+c, typeof v==='number'?v.toLocaleString():v, typeof v==='number'?'num':'');
+    });
+  });
+  const tot=[0,0,0,0];
+  FAKE_ROWS.forEach(r=>{ for(let i=0;i<4;i++) tot[i]+=r[1+i]; });
+  setCell(5+FAKE_ROWS.length,1,'총계','bold');
+  tot.forEach((v,i)=>setCell(5+FAKE_ROWS.length,2+i,v.toLocaleString(),'num bold hl'));
+}
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    if(dlg.classList.contains('show')){ closeDlg(); return; }
+    bossMode=!bossMode; render(); return;
+  }
+  if(dlg.classList.contains('show')) return;
+  if(!bossMode && /^[1-9]$/.test(e.key)){
+    const tds=[...sheetEl.querySelectorAll('td.choice')];
+    if(tds[+e.key-1]) tds[+e.key-1].click();
+  }
+});
+
+render();
+cloudLoadCheck();
+</script>
+</body>
+</html>
