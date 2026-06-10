@@ -154,7 +154,7 @@ let cells = [];
 })();
 
 function clearGrid(){
-  sheetEl.querySelectorAll('td').forEach(td=>{ td.textContent=''; td.className=''; td.onclick=null; });
+  sheetEl.querySelectorAll('td').forEach(td=>{ td.textContent=''; td.className=''; td.onclick=null; td.contentEditable='false'; });
 }
 function setCell(r,c,text,cls,onclick){
   if(r>ROWS||c>=COLS||r<1) return;
@@ -769,14 +769,16 @@ function scrParty(){
     if(i!==G.active && m.hp>0) choices.push([`${monName(m)}을(를) 선두로`, ()=>{ G.active=i; render(); }]);
   });
   if(G.party.length>1){
-    choices.push(['몬스터를 보관함으로 보낸다', ()=>{ boxMode='deposit'; G.screen='box'; render(); }]);
+    choices.push(['몬스터를 보관함으로 보낸다', ()=>{ boxMode='deposit'; boxSel=-1; G.screen='box'; render(); }]);
   }
-  choices.push([`보관함 열기 (${G.box.length}마리)`, ()=>{ boxMode='view'; G.screen='box'; render(); }]);
+  choices.push([`보관함 열기 (${G.box.length}마리)`, ()=>{ boxMode='view'; boxSel=-1; boxPage=0; G.screen='box'; render(); }]);
   choices.push(['돌아간다', ()=>{ G.screen='hub'; render(); }]);
   paint(lines, choices);
 }
 
 let boxMode = 'view';
+const BOX_PAGE_SIZE = 7; /* 숫자키(1~9)로 전부 선택 가능하도록 7마리 + 페이지/돌아가기 */
+let boxPage = 0, boxSel = -1, boxMsg = '';
 function scrBox(){
   const lines = [['― 보관함 (사물함) ―','bold'],''];
   if(boxMode==='deposit'){
@@ -794,16 +796,55 @@ function scrBox(){
     paint(lines, choices);
     return;
   }
-  if(G.box.length===0) lines.push('보관함이 비어 있다.');
-  else G.box.forEach(m=>lines.push([`· ${monName(m)} LV${m.lv} [${monType(m)}] HP ${m.hp}/${m.maxhp}${m.trait?' · 특성 '+m.trait:''}`, monCls(m)]));
-  const choices = [];
-  G.box.forEach((m,i)=>{
-    if(G.party.length<4) choices.push([`${monName(m)}을(를) 파티로`, ()=>{
-      G.party.push(m); G.box.splice(i,1); render();
+  const selMon = boxSel>=0 ? G.box[boxSel] : null;
+  /* 방생 확인 */
+  if(selMon && boxMode==='release'){
+    lines.push([`정말 ${monName(selMon)} (LV${selMon.lv})을(를) 풀어줄까?`,'hl'],'');
+    lines.push(['풀어준 몬스터는 다시 돌아오지 않는다!','dim']);
+    paint(lines,[
+      ['풀어준다', ()=>{
+        boxMsg = `${monName(selMon)}이(가) 자유를 찾아 떠났다…`;
+        G.box.splice(boxSel,1);
+        boxSel=-1; boxMode='view'; render();
+      }],
+      ['그만둔다', ()=>{ boxMode='view'; render(); }],
+    ]);
+    return;
+  }
+  /* 상세 보기 */
+  if(selMon){
+    lines.push([`${monName(selMon)}  LV${selMon.lv} [${monType(selMon)}]`, monCls(selMon)]);
+    lines.push(`HP ${selMon.hp}/${selMon.maxhp} · 공격 ${selMon.atk} · EXP ${selMon.exp}/${expNeed(selMon.lv)}`);
+    lines.push(['기술: '+knownMoves(selMon).map(mv=>mv[1]).join(', '),'dim']);
+    if(selMon.trait) lines.push([`특성: ${selMon.trait} — ${TRAITS[selMon.trait]}`,'dim']);
+    const choices = [];
+    if(G.party.length<4) choices.push(['파티로 꺼낸다', ()=>{
+      G.party.push(selMon); G.box.splice(boxSel,1); boxSel=-1; render();
     }]);
+    else lines.push('',['파티가 가득 차서 꺼낼 수 없다. (최대 4마리)','dim']);
+    choices.push(['풀어준다 (방생)', ()=>{ boxMode='release'; render(); }]);
+    choices.push(['목록으로', ()=>{ boxSel=-1; render(); }]);
+    paint(lines, choices);
+    return;
+  }
+  /* 목록 (페이지) */
+  if(boxMsg){ lines.push([boxMsg,'hl'],''); boxMsg=''; }
+  const totalPages = Math.max(1, Math.ceil(G.box.length/BOX_PAGE_SIZE));
+  if(boxPage>=totalPages) boxPage = totalPages-1;
+  if(G.box.length===0) lines.push('보관함이 비어 있다.');
+  else {
+    lines.push([`보관 중 ${G.box.length}마리 · ${boxPage+1}/${totalPages} 페이지`,'dim']);
+    lines.push('몬스터를 선택하면 꺼내기 / 풀어주기를 할 수 있다.');
+  }
+  const choices = [];
+  const start = boxPage*BOX_PAGE_SIZE;
+  G.box.slice(start, start+BOX_PAGE_SIZE).forEach((m,i)=>{
+    choices.push([`${monName(m)} LV${m.lv} [${monType(m)}] HP ${m.hp}/${m.maxhp}${m.trait?' · '+m.trait:''}`,
+      ()=>{ boxSel = start+i; render(); }]);
   });
-  if(G.party.length>=4 && G.box.length>0) lines.push('',['파티가 가득 차서 꺼낼 수 없다. (최대 4마리)','dim']);
-  choices.push(['돌아간다', ()=>{ G.screen='party'; render(); }]);
+  if(totalPages>1) choices.push([`다음 페이지 ▶ (${(boxPage+1)%totalPages+1}/${totalPages})`,
+    ()=>{ boxPage=(boxPage+1)%totalPages; render(); }]);
+  choices.push(['돌아간다', ()=>{ boxSel=-1; boxPage=0; G.screen='party'; render(); }]);
   paint(lines, choices);
 }
 
@@ -1247,33 +1288,65 @@ function openLoadDlg(){
   dlgText.focus();
 }
 
-/* ════════════════ 보스 키 (ESC 위장 시트) ════════════════ */
+/* ════════════════ 보스 키 (ESC 위장 시트 — 연차 계획, 직접 편집 가능) ════════════════ */
 let bossMode = false;
-const FAKE_ROWS = (()=>{
-  const items=['온라인 광고','오프라인 행사','제휴 마케팅','콘텐츠 제작','SNS 운영','검색 광고','뉴스레터','프로모션','인쇄물','기타 경비'];
-  return items.map(n=>{
-    const a=Math.round(3200+Math.random()*4800);
-    const b2=Math.round(a*(0.82+Math.random()*0.3));
-    const c=Math.round(b2*(0.85+Math.random()*0.3));
-    return [n,a,b2,c,a+b2+c];
-  });
+const FAKE_SHEET = (()=>{
+  const cells = [ {r:2,c:1,text:'2026년 연차 사용 계획 (개인)',cls:'bold'} ];
+  ['월','날짜','일수','구분','사유','결재'].forEach((h,i)=>cells.push({r:4,c:1+i,text:h,cls:'hdr'}));
+  const rows = [
+    ['1월','1/2(금)','1','연차','설 연휴 연결','승인'],
+    ['2월','2/13(금)','1','연차','가족 행사','승인'],
+    ['3월','3/23(월)','0.5','오후 반차','병원 진료','승인'],
+    ['5월','5/4(월)','1','연차','황금연휴','대기'],
+    ['6월','6/15(월)','1','연차','개인 사유','대기'],
+    ['7월','7/27(월)~29(수)','3','여름휴가','가족 여행','예정'],
+    ['9월','9/21(월)','1','연차','추석 연결','예정'],
+    ['11월','11/20(금)','0.5','오전 반차','건강검진','예정'],
+    ['12월','12/24(목)','1','연차','연말','예정'],
+  ];
+  rows.forEach((row,i)=>row.forEach((v,c)=>cells.push({r:5+i,c:1+c,text:v,cls:c===2?'num':''})));
+  const used = rows.reduce((s,row)=>s+parseFloat(row[2]),0);
+  cells.push({r:5+rows.length+1,c:1,text:'총 연차',cls:'bold'},   {r:5+rows.length+1,c:2,text:'15',cls:'num'});
+  cells.push({r:5+rows.length+2,c:1,text:'사용 계획',cls:'bold'}, {r:5+rows.length+2,c:2,text:String(used),cls:'num'});
+  cells.push({r:5+rows.length+3,c:1,text:'잔여',cls:'bold'},     {r:5+rows.length+3,c:2,text:String(15-used),cls:'num bold hl'});
+  return cells;
 })();
+
+/* 위장 시트에서 사용자가 타이핑한 내용 — 브라우저에 보존해 다음에도 유지 */
+const FAKE_EDIT_KEY = 'cellquest_fakesheet';
+let fakeEdits = {};
+try{ fakeEdits = JSON.parse(localStorage.getItem(FAKE_EDIT_KEY)||'{}') || {}; }catch(e){ fakeEdits = {}; }
+function saveFakeEdits(){ try{ localStorage.setItem(FAKE_EDIT_KEY, JSON.stringify(fakeEdits)); }catch(e){} }
+
 function paintBossSheet(){
   clearGrid();
   setStatus('준비');
-  setFx('=SUM(C4:E4)');
-  setCell(2,1,'2026년 2분기 채널별 집행 비용 (단위: 천원)','bold');
-  ['항목','4월','5월','6월','합계'].forEach((h,i)=>setCell(4,1+i,h,'hdr'));
-  FAKE_ROWS.forEach((row,r)=>{
-    row.forEach((v,c)=>{
-      setCell(5+r,1+c, typeof v==='number'?v.toLocaleString():v, typeof v==='number'?'num':'');
-    });
-  });
-  const tot=[0,0,0,0];
-  FAKE_ROWS.forEach(r=>{ for(let i=0;i<4;i++) tot[i]+=r[1+i]; });
-  setCell(5+FAKE_ROWS.length,1,'총계','bold');
-  tot.forEach((v,i)=>setCell(5+FAKE_ROWS.length,2+i,v.toLocaleString(),'num bold hl'));
+  setFx('=15-SUM(C5:C13)');
+  const painted = new Set();
+  for(const cell of FAKE_SHEET){
+    const k = cell.r+','+cell.c;
+    painted.add(k);
+    setCell(cell.r, cell.c, (k in fakeEdits) ? fakeEdits[k] : cell.text, cell.cls);
+  }
+  for(const k in fakeEdits){
+    if(painted.has(k)) continue;
+    const [r,c] = k.split(',').map(Number);
+    setCell(r, c, fakeEdits[k]);
+  }
+  sheetEl.querySelectorAll('td').forEach(td=>{ td.contentEditable = 'true'; });
 }
+
+/* 위장 시트 셀 편집: 입력 즉시 저장, Enter = 편집 종료 (엑셀처럼) */
+sheetEl.querySelectorAll('td').forEach(td=>{
+  td.addEventListener('input', ()=>{
+    if(!bossMode) return;
+    fakeEdits[td.dataset.r+','+td.dataset.c] = td.textContent;
+    saveFakeEdits();
+  });
+  td.addEventListener('keydown', e=>{
+    if(bossMode && e.key==='Enter'){ e.preventDefault(); td.blur(); }
+  });
+});
 
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
