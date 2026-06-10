@@ -42,6 +42,8 @@
   table.sheet td.dim { color:#999; }
   table.sheet td.hl { background:#fff7d1; }
   table.sheet td.gold { background:#fff3c4; color:#8a6d00; font-weight:bold; }
+  table.sheet td.prism { background:linear-gradient(90deg,#fde8ff,#e8f4ff,#e8fff1); color:#7a2e8d; font-weight:bold; }
+  table.sheet td.legend { background:#3a1f04; color:#ffd700; font-weight:bold; }
   table.sheet td.hdr { background:#dce6f1; font-weight:bold; border-color:#b8cce4; }
   table.sheet td.selected { outline:2px solid #217346; outline-offset:-1px; }
   .sheettabs { background:#f3f2f1; border-top:1px solid #d4d4d4; height:25px; display:flex; align-items:flex-end; padding-left:30px; flex-shrink:0; }
@@ -319,19 +321,47 @@ const STORY = [
 ];
 
 /* ════════════════ 몬스터 생성/성장 ════════════════ */
-function statsFor(sid, lv, gold){
+/* 개체 희귀도 (종족 legend 플래그와 별개) */
+const RARITY = {
+  normal:{ mult:1,    catch:1,    pay:1,  prefix:'',      cls:'',       rank:0 },
+  gold:  { mult:1.15, catch:0.75, pay:3,  prefix:'황금 ',   cls:'gold',   rank:1 },
+  prism: { mult:1.30, catch:0.55, pay:5,  prefix:'프리즘 ',  cls:'prism',  rank:2 },
+  legend:{ mult:1.50, catch:0.35, pay:10, prefix:'레전드 ',  cls:'legend', rank:3 },
+};
+const TRAITS = {
+  흡혈:'준 데미지의 25%만큼 HP 회복',
+  강철:'받는 데미지 20% 감소',
+  집중:'급소율 8% → 20%',
+  재생:'자기 턴마다 최대 HP 6% 회복',
+};
+/* 출현율: 레전드 0.3% / 프리즘 1.5% / 황금 6% */
+function rollRarity(){
+  const r = Math.random();
+  if(r < 0.003) return 'legend';
+  if(r < 0.018) return 'prism';
+  if(r < 0.078) return 'gold';
+  return 'normal';
+}
+function statsFor(sid, lv, rar){
   const s = SPECIES[sid];
-  const mult = gold ? 1.15 : 1;
+  const mult = RARITY[rar||'normal'].mult;
   return {
     maxhp: Math.round((s.hp + (lv-1)*6) * mult),
     atk: Math.round(s.atk * (1+0.08*(lv-1)) * mult),
   };
 }
-function makeMon(sid, lv, gold){
-  const st = statsFor(sid, lv, gold);
-  return { sid, lv, gold:!!gold, maxhp:st.maxhp, hp:st.maxhp, atk:st.atk, exp:0 };
+function makeMon(sid, lv, rar){
+  rar = rar||'normal';
+  const st = statsFor(sid, lv, rar);
+  const m = { sid, lv, rar, maxhp:st.maxhp, hp:st.maxhp, atk:st.atk, exp:0 };
+  if(rar==='legend'){
+    const keys = Object.keys(TRAITS);
+    m.trait = keys[Math.floor(Math.random()*keys.length)];
+  }
+  return m;
 }
-function monName(m){ return (m.gold?'황금 ':'') + SPECIES[m.sid].name; }
+function monName(m){ return RARITY[m.rar||'normal'].prefix + SPECIES[m.sid].name; }
+function monCls(m){ return RARITY[m.rar||'normal'].cls; }
 function monType(m){ return SPECIES[m.sid].type; }
 function knownMoves(m){
   return SPECIES[m.sid].moves.filter(mv=>mv[0]<=m.lv).slice(-4);
@@ -342,11 +372,11 @@ function expNeed(lv){ return lv*22; }
 let G = null;
 function newGame(){
   G = {
-    v:2, screen:'title', name:'',
+    v:3, screen:'title', name:'',
     party:[], box:[], active:0,
     items:{ clip:5, goldclip:0, bacchus:3, hotsix:0, coffee:0 },
     money:200, wins:0, story:0,
-    dex:{}, goldDex:{}, dexRewards:[],
+    dex:{}, rarDex:{}, dexRewards:[],
     battle:null, log:[], floor:0,
   };
 }
@@ -363,9 +393,10 @@ const ITEM_DEF = {
 function activeMon(){ return G.party[G.active]; }
 function aliveMons(){ return G.party.filter(m=>m.hp>0); }
 function dexSee(sid){ if(!G.dex[sid]) G.dex[sid]=1; }
-function dexCatch(sid, gold){
+function dexCatch(sid, rar){
   G.dex[sid]=2;
-  if(gold) G.goldDex[sid]=true;
+  rar = rar||'normal';
+  if(RARITY[rar].rank > RARITY[G.rarDex[sid]||'normal'].rank) G.rarDex[sid]=rar;
   checkDexRewards();
 }
 function dexCaughtCount(){ return ALL_SIDS.filter(s=>G.dex[s]===2).length; }
@@ -404,7 +435,7 @@ async function cloudLoadCheck(){
     const r = await window.storage.get('savegame');
     if(r && r.value){
       const obj = JSON.parse(r.value);
-      if(obj && obj.v===2 && Array.isArray(obj.party)) cloudSaveData = obj;
+      if(obj && (obj.v===2||obj.v===3) && Array.isArray(obj.party)) cloudSaveData = migrateSave(obj);
     }
   }catch(e){ /* 저장 데이터 없음 */ }
   if(G.screen==='title' && !bossMode) render();
@@ -417,7 +448,7 @@ async function updateBoard(force){
   try{
     await window.storage.set('lb:'+G.name, JSON.stringify({
       name:G.name, wins:G.wins, dex:dexCaughtCount(),
-      gold:Object.keys(G.goldDex).length, story:G.story, ts:Date.now()
+      gold:Object.keys(G.rarDex||{}).length, story:G.story, ts:Date.now()
     }), true);
   }catch(e){}
 }
@@ -470,7 +501,7 @@ function paintPartyPanel(){
   setCell(2,7,'■ 파티 현황','hdr'); setCell(2,8,'LV','hdr'); setCell(2,9,'HP','hdr'); setCell(2,10,'상태','hdr');
   G.party.forEach((m,i)=>{
     const r = 3+i;
-    setCell(r,7,(i===G.active?'▶ ':'')+monName(m), m.gold?'gold':(i===G.active?'bold':''));
+    setCell(r,7,(i===G.active?'▶ ':'')+monName(m), monCls(m)||(i===G.active?'bold':''));
     setCell(r,8,String(m.lv),'num');
     setCell(r,9,`${m.hp}/${m.maxhp}`,'num');
     setCell(r,10, m.hp<=0?'기절': m.hp<m.maxhp*0.3?'위험':'정상', m.hp<=0?'dim':'');
@@ -534,7 +565,8 @@ function scrTitle(){
   if(hasCloud){
     lines.push(['※ 진행 상황은 자동 저장됩니다. 랭킹 보드의 이름·기록은 함께 플레이하는 모두에게 공개됩니다.','dim']);
   } else {
-    lines.push(['※ 진행 상황은 [백업 코드]로 저장/복원할 수 있습니다.','dim']);
+    lines.push(['⚠ 이 게임은 자동 저장되지 않습니다! 메뉴의 [백업 코드]가 유일한 저장 수단입니다.','hl']);
+    lines.push(['  (새로고침·창 닫기 시 진행이 사라지니, 수시로 코드를 발급해 메모장에 보관하세요)','dim']);
   }
   const choices = [];
   if(cloudSaveData){
@@ -577,7 +609,7 @@ function openNameDlg(){
 function scrStarter(){
   const pick = sid => () => {
     G.party=[makeMon(sid,4)];
-    dexCatch(sid,false);
+    dexCatch(sid);
     G.screen='storyBeat'; storyBeatNext='hub';
     render();
   };
@@ -644,7 +676,7 @@ function scrHub(){
     ['몬스터 도감', ()=>{ G.screen='dex'; render(); }],
   );
   if(hasCloud) choices.push(['사내 랭킹 보드', ()=>{ G.screen='rank'; render(); }]);
-  choices.push(['백업 코드 (저장/불러오기)', openSaveDlg]);
+  choices.push([hasCloud?'백업 코드 (저장/불러오기)':'백업 코드 (저장/불러오기) — ⚠ 유일한 저장 수단', openSaveDlg]);
   paint(lines, choices, `=NOW() · ${fl.name}`);
 }
 
@@ -703,8 +735,9 @@ function scrShop(){
 function scrParty(){
   const lines = [['― 파티 관리 ―','bold'],''];
   G.party.forEach((m,i)=>{
-    lines.push([`${i===G.active?'▶':' '} ${monName(m)}  LV${m.lv} [${monType(m)}]  HP ${m.hp}/${m.maxhp}  공격 ${m.atk}  EXP ${m.exp}/${expNeed(m.lv)}`, m.gold?'gold':'']);
+    lines.push([`${i===G.active?'▶':' '} ${monName(m)}  LV${m.lv} [${monType(m)}]  HP ${m.hp}/${m.maxhp}  공격 ${m.atk}  EXP ${m.exp}/${expNeed(m.lv)}`, monCls(m)]);
     lines.push(['    기술: '+knownMoves(m).map(mv=>mv[1]).join(', '),'dim']);
+    if(m.trait) lines.push([`    특성: ${m.trait} — ${TRAITS[m.trait]}`,'dim']);
   });
   const choices = [];
   G.party.forEach((m,i)=>{
@@ -737,7 +770,7 @@ function scrBox(){
     return;
   }
   if(G.box.length===0) lines.push('보관함이 비어 있다.');
-  else G.box.forEach(m=>lines.push([`· ${monName(m)} LV${m.lv} [${monType(m)}] HP ${m.hp}/${m.maxhp}`, m.gold?'gold':'']));
+  else G.box.forEach(m=>lines.push([`· ${monName(m)} LV${m.lv} [${monType(m)}] HP ${m.hp}/${m.maxhp}${m.trait?' · 특성 '+m.trait:''}`, monCls(m)]));
   const choices = [];
   G.box.forEach((m,i)=>{
     if(G.party.length<4) choices.push([`${monName(m)}을(를) 파티로`, ()=>{
@@ -753,7 +786,7 @@ function scrBox(){
 function scrDex(){
   clearGrid();
   setCell(2,1,`― 오피스 몬스터 도감 ―  등록 ${dexCaughtCount()} / ${ALL_SIDS.length}`,'bold');
-  setCell(3,1,'─ 미확인 / 👁 목격 / ✔ 포획 / ★ 황금 개체 포획','dim');
+  setCell(3,1,'─ 미확인 / 👁 목격 / ✔ 포획 / ★ 황금 / ◆ 프리즘 / 👑 레전드','dim');
   const half = Math.ceil(ALL_SIDS.length/2);
   ALL_SIDS.forEach((sid,i)=>{
     const col = i<half ? 1 : 4;
@@ -762,7 +795,12 @@ function scrDex(){
     const no = String(i+1).padStart(2,'0');
     let mark = '─', name='?????', cls='dim';
     if(st===1){ mark='👁'; name=SPECIES[sid].name; cls='dim'; }
-    if(st===2){ mark = G.goldDex[sid]?'★':'✔'; name=SPECIES[sid].name; cls = G.goldDex[sid]?'gold':''; }
+    if(st===2){
+      const rd = G.rarDex[sid];
+      mark = rd==='legend'?'👑': rd==='prism'?'◆': rd==='gold'?'★':'✔';
+      name = SPECIES[sid].name;
+      cls = rd ? RARITY[rd].cls : '';
+    }
     setCell(r,col,`${no}.`,'num dim');
     setCell(r,col+1,`${mark} ${name}`,cls);
     if(st>0) setCell(r,col+2,`[${SPECIES[sid].type}]`,'dim');
@@ -787,8 +825,8 @@ function startExplore(area){
     const lv = SPECIES[sid].legend
       ? (sid==='dragon'?18:24)
       : area.lv[0] + Math.floor(Math.random()*(area.lv[1]-area.lv[0]+1));
-    const gold = !SPECIES[sid].legend && Math.random()<0.06;
-    startWildBattle(makeMon(sid, lv, gold));
+    const rar = SPECIES[sid].legend ? 'normal' : rollRarity();
+    startWildBattle(makeMon(sid, lv, rar));
   } else if(roll < 0.90){
     const pickPool = G.story>=3 ? ['clip','clip','bacchus','goldclip'] : ['clip','clip','bacchus'];
     const found = pickPool[Math.floor(Math.random()*pickPool.length)];
@@ -824,7 +862,9 @@ function startWildBattle(enemy){
   dexSee(enemy.sid);
   G.battle = { enemy, wild:true, over:false, menu:'main' };
   G.log = [`야생의 ${monName(enemy)}(LV${enemy.lv})이(가) 나타났다!`];
-  if(enemy.gold) G.log.push('황금빛으로 빛나고 있다…! (희귀 개체)');
+  if(enemy.rar==='gold') G.log.push('황금빛으로 빛나고 있다…! (희귀 개체)');
+  if(enemy.rar==='prism') G.log.push('공기가 일렁이며 무지갯빛으로 빛난다…!! (초희귀 개체)');
+  if(enemy.rar==='legend') G.log.push(`전설로만 듣던 기운이 휘몰아친다…!! 절대 놓치지 마라! (특성: ${enemy.trait})`);
   if(SPECIES[enemy.sid].legend) G.log.push('압도적인 야근의 기운이 느껴진다…!');
   G.screen='battle'; render();
 }
@@ -842,9 +882,25 @@ function startBossBattle(idx){
 
 function dmgCalc(attacker, power, moveType, defender){
   const mult = moveType ? typeMult(moveType, monType(defender)) : 1;
-  const crit = Math.random()<0.08 ? 1.5 : 1;
-  const base = attacker.atk * power/40 * mult * crit * (0.85+Math.random()*0.3);
+  const critRate = attacker.trait==='집중' ? 0.20 : 0.08;
+  const crit = Math.random()<critRate ? 1.5 : 1;
+  let base = attacker.atk * power/40 * mult * crit * (0.85+Math.random()*0.3);
+  if(defender.trait==='강철') base *= 0.8;
   return { val: Math.max(1, Math.round(base)), mult, crit: crit>1 };
+}
+/* 레전드 패시브 (행동 직후 발동) */
+function applyTraits(actor, dealt){
+  if(actor.hp<=0) return;
+  if(actor.trait==='흡혈' && dealt>0 && actor.hp<actor.maxhp){
+    const heal = Math.min(actor.maxhp-actor.hp, Math.max(1,Math.round(dealt*0.25)));
+    actor.hp += heal;
+    pushLog(`${monName(actor)}의 [흡혈] 발동! HP ${heal} 회복`);
+  }
+  if(actor.trait==='재생' && actor.hp<actor.maxhp){
+    const heal = Math.min(actor.maxhp-actor.hp, Math.max(1,Math.round(actor.maxhp*0.06)));
+    actor.hp += heal;
+    pushLog(`${monName(actor)}의 [재생] 발동! HP ${heal} 회복`);
+  }
 }
 function fxTag(mult, crit){
   let s='';
@@ -862,6 +918,7 @@ function enemyTurn(){
   const {val,mult,crit} = dmgCalc(e, mv[2], mv[3], me);
   me.hp = Math.max(0, me.hp - val);
   pushLog(`${monName(e)}의 ${mv[1]}! ${val} 데미지${fxTag(mult,crit)}`);
+  applyTraits(e, val);
   if(me.hp<=0){
     pushLog(`${monName(me)}이(가) 기절했다!`);
     if(aliveMons().length===0){
@@ -877,7 +934,7 @@ function enemyTurn(){
 function grantExpAndMoney(e, moneyMult){
   const me = activeMon();
   const exp = e.lv*13;
-  const pay = Math.round(e.lv*15*(e.gold?3:1)*(moneyMult||1));
+  const pay = Math.round(e.lv*15*RARITY[e.rar||'normal'].pay*(moneyMult||1));
   G.money += pay;
   me.exp += exp;
   pushLog(`경험치 ${exp}, 복지포인트 ${pay}P 획득!`);
@@ -885,7 +942,7 @@ function grantExpAndMoney(e, moneyMult){
     me.exp -= expNeed(me.lv);
     me.lv++;
     const before = knownMoves(me).map(m=>m[1]);
-    const st = statsFor(me.sid, me.lv, me.gold);
+    const st = statsFor(me.sid, me.lv, me.rar);
     const gain = st.maxhp - me.maxhp;
     me.maxhp = st.maxhp; me.atk = st.atk;
     me.hp = Math.min(me.maxhp, me.hp+gain);
@@ -894,12 +951,12 @@ function grantExpAndMoney(e, moneyMult){
     if(evo && me.lv>=evo.lv){
       const oldName = monName(me);
       me.sid = evo.to;
-      const st2 = statsFor(me.sid, me.lv, me.gold);
+      const st2 = statsFor(me.sid, me.lv, me.rar);
       const ratio = me.hp/me.maxhp;
       me.maxhp = st2.maxhp; me.atk = st2.atk;
       me.hp = Math.max(1, Math.round(me.maxhp*ratio));
       pushLog(`!! ${oldName}이(가) ${monName(me)}(으)로 진화했다 !!`);
-      dexCatch(me.sid, me.gold);
+      dexCatch(me.sid, me.rar);
     }
     const after = knownMoves(me).map(m=>m[1]);
     after.filter(n=>!before.includes(n)).forEach(n=>pushLog(`새 기술 [${n}]을(를) 배웠다!`));
@@ -929,6 +986,7 @@ function onTrainerMonDown(){
     b.over=true; G.wins++;
     G.money += B.reward;
     pushLog(`★ ${B.name}에게 승리! 보상 ${B.reward}P!`);
+    if(!hasCloud) pushLog('💾 큰 진행을 했다! [백업 코드]를 발급해 보관해 두자.');
     if(b.bossIdx===G.story){
       G.story++;
       if(G.story===5){ setTimeout(()=>{ G.screen='ending'; render(); },40); return; }
@@ -941,14 +999,17 @@ function onTrainerMonDown(){
 function playerMove(mvIdx){
   const b=G.battle; if(b.over) return;
   const me=activeMon(), e=b.enemy;
+  if(me.hp<=0){ b.menu='forceSwitch'; render(); return; }
   const mv = knownMoves(me)[mvIdx];
   const {val,mult,crit} = dmgCalc(me, mv[2], mv[3], e);
   e.hp = Math.max(0, e.hp - val);
   pushLog(`${monName(me)}의 ${mv[1]}! ${val} 데미지${fxTag(mult,crit)}`);
+  applyTraits(me, val);
+  /* 주의: enemyTurn()이 menu를 forceSwitch로 바꿀 수 있으므로 main 초기화는 반드시 그 전에 */
+  b.menu='main';
   if(e.hp<=0){
     if(b.wild) winWild(); else onTrainerMonDown();
   } else enemyTurn();
-  b.menu='main';
   render();
 }
 
@@ -959,40 +1020,44 @@ function throwClip(gold){
   G.items[key]--;
   const e=b.enemy;
   let chance = (0.22 + 0.65*(1 - e.hp/e.maxhp)) * (gold?1.6:1);
-  if(e.gold) chance *= 0.75;
+  chance *= RARITY[e.rar||'normal'].catch;
   if(SPECIES[e.sid].legend) chance *= 0.45;
+  b.menu='main';
   if(Math.random()<chance){
     pushLog(`클립이 ${monName(e)}을(를) 집었다! 포획 성공!!`);
     e.hp = Math.max(1, e.hp);
     if(G.party.length<4){ G.party.push(e); pushLog('파티에 합류했다.'); }
     else { G.box.push(e); pushLog('파티가 가득 차서 보관함으로 이동했다.'); }
-    dexCatch(e.sid, e.gold);
+    dexCatch(e.sid, e.rar);
+    if(e.trait) pushLog(`특성 [${e.trait}] — ${TRAITS[e.trait]}`);
+    if(!hasCloud && RARITY[e.rar||'normal'].rank>=2) pushLog('💾 희귀 개체 획득! 잃기 전에 [백업 코드]를 발급해 두자.');
     b.over=true;
   } else {
     pushLog(`아깝다! ${monName(e)}이(가) 클립을 튕겨냈다!`);
     enemyTurn();
   }
-  b.menu='main';
   render();
 }
 
 function useHeal(kind){
   const b=G.battle; if(b.over) return;
   const me=activeMon();
+  if(me.hp<=0){ b.menu='forceSwitch'; render(); return; }
   if(G.items[kind]<=0){ pushLog('아이템이 없다!'); render(); return; }
   if(me.hp>=me.maxhp){ pushLog('HP가 이미 가득하다!'); render(); return; }
   G.items[kind]--;
   if(kind==='bacchus'){ me.hp=Math.min(me.maxhp, me.hp+35); pushLog(`${monName(me)} HP 35 회복!`); }
   else { me.hp=me.maxhp; pushLog(`${monName(me)} HP 완전 회복!`); }
-  enemyTurn(); b.menu='main'; render();
+  b.menu='main'; enemyTurn(); render();
 }
 
 function tryRun(){
   const b=G.battle; if(b.over) return;
   if(!b.wild){ pushLog('보스 앞에서 도망칠 수는 없다…!'); render(); return; }
+  b.menu='main';
   if(Math.random()<0.7){ pushLog('무사히 도망쳤다!'); b.over=true; }
   else { pushLog('도망칠 수 없었다!'); enemyTurn(); }
-  b.menu='main'; render();
+  render();
 }
 
 function switchMon(i, free){
@@ -1000,16 +1065,19 @@ function switchMon(i, free){
   if(G.party[i].hp<=0 || i===G.active) return;
   G.active=i;
   pushLog(`가라, ${monName(G.party[i])}!`);
+  b.menu='main';
   if(!free && !b.over) enemyTurn();
-  b.menu='main'; render();
+  render();
 }
 
 function scrBattle(){
   setStatus('계산 중...');
   const b=G.battle, e=b.enemy, me=activeMon();
+  /* 선두가 기절 상태로 메인 메뉴에 머무는 일이 없도록 (구버전 저장 데이터 복구 겸) */
+  if(!b.over && me.hp<=0 && aliveMons().length>0) b.menu='forceSwitch';
   const bossLabel = b.wild ? '' : ` 〔${BOSSES[b.bossIdx].name} ${b.eIdx+1}/${b.enemyParty.length}〕`;
   const lines = [
-    [`⚔ ${monName(e)}  LV${e.lv}  [${monType(e)}]${bossLabel}`, e.gold?'gold':'bold'],
+    [`⚔ ${monName(e)}  LV${e.lv}  [${monType(e)}]${bossLabel}`, monCls(e)||'bold'],
     [`   HP ${e.hp}/${e.maxhp}  ${'█'.repeat(Math.ceil(e.hp/e.maxhp*10)).padEnd(10,'░')}`, e.hp<e.maxhp*0.3?'hl':''],
     '',
     ...G.log,
@@ -1072,8 +1140,8 @@ function scrEnding(){
     ['★★★ 진엔딩 — 전설의 사원 ★★★','bold'],'',
     '회장봉황마저 당신을 인정했다. 회사 역사상 최초의 일이다.',
     '게시판에 공지가 붙었다. "전 직원 주 4일제 시범 도입."','',
-    [`최종 기록 — 승수 ${G.wins} / 도감 ${dexCaughtCount()}/${ALL_SIDS.length} / 황금 ${Object.keys(G.goldDex).length}종`,'hl'],'',
-    '남은 목표: 도감 완성, 황금 개체 수집, 전설 포획(야근차원에서 드물게 출현)',
+    [`최종 기록 — 승수 ${G.wins} / 도감 ${dexCaughtCount()}/${ALL_SIDS.length} / 희귀 ${Object.keys(G.rarDex).length}종`,'hl'],'',
+    '남은 목표: 도감 완성, 황금·프리즘·레전드 개체 수집, 전설 포획(야근차원에서 드물게 출현)',
   ] : [
     ['★★★ 엔딩 ★★★','bold'],'',
     BOSSES[4].win,
@@ -1083,6 +1151,7 @@ function scrEnding(){
     ['야근차원에서는 부장드래곤이 야생 개체로 드물게 출현해 포획할 수 있다.','hl'],
     '그리고 가장 깊은 곳에는… 회장봉황이 기다린다.',
   ];
+  if(!hasCloud) lines.push('',['⚠ 자동 저장이 없는 환경입니다. 지금 바로 백업 코드를 발급해 보관하세요!','hl']);
   paint(lines,[
     ['계속 모험한다', ()=>{ G.screen='storyBeat'; storyBeatNext='hub'; render(); }],
     ['백업 코드 발급 (저장)', openSaveDlg],
@@ -1098,11 +1167,28 @@ function closeDlg(){ dlg.classList.remove('show'); }
 function encodeSave(){
   return btoa(unescape(encodeURIComponent(JSON.stringify(G))));
 }
+/* v2(황금 boolean) 백업 코드 → v3(rar 등급) 변환 */
+function migrateSave(obj){
+  if(obj.v===2){
+    for(const m of [...(obj.party||[]), ...(obj.box||[])]){
+      m.rar = m.gold ? 'gold' : 'normal';
+      delete m.gold;
+    }
+    obj.rarDex = {};
+    for(const sid of Object.keys(obj.goldDex||{})) obj.rarDex[sid]='gold';
+    delete obj.goldDex;
+    obj.battle = null;
+    if(obj.screen==='battle') obj.screen='hub';
+    obj.v = 3;
+  }
+  if(!obj.rarDex) obj.rarDex = {};
+  return obj;
+}
 function decodeSave(code){
   const obj = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
-  if(!obj || obj.v!==2 || !Array.isArray(obj.party)) throw new Error('bad');
+  if(!obj || (obj.v!==2 && obj.v!==3) || !Array.isArray(obj.party)) throw new Error('bad');
   if(!obj.name) obj.name = '사원'+Math.floor(Math.random()*900+100);
-  return obj;
+  return migrateSave(obj);
 }
 function openSaveDlg(){
   document.getElementById('dlgtitle').textContent = '이름 정의 — 백업';
