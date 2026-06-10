@@ -508,6 +508,7 @@ function newGame(){
   };
 }
 const COOLER_RECHARGE_WINS = 3;
+const COOLER_REFILL_COST = 300;
 newGame();
 
 const ITEM_DEF = {
@@ -516,7 +517,7 @@ const ITEM_DEF = {
   bacchus: { name:'박카스',    desc:'HP 35 회복', price:70 },
   hotsix:  { name:'핫식스',    desc:'HP 완전 회복', price:180 },
   coffee:  { name:'모닝커피',  desc:'기절 회복 (HP 50%)', price:220 },
-  ample:   { name:'수상한 앰플', desc:'도핑 재료 — 성공 시 영구 강화, 실패 시 영구 약화', price:500 },
+  ample:   { name:'수상한 앰플', desc:'도핑 재료 — 성공 시 영구 강화, 실패 시 영구 약화', price:2000 },
 };
 
 /* ── 도핑 (v2.0): 수상한 앰플로 영구 강화/약화. 효과는 배율로 누적 ── */
@@ -885,23 +886,40 @@ function scrHub(){
   if(G.story>=6 && !G.isekai){
     choices.push(['★★ …요즘 가슴이 답답하다. (제2부 시작)', ()=>{ G.screen='isekai'; render(); }]);
   }
-  choices.push(
-    ['다른 층으로 이동', ()=>{ G.screen='moveFloor'; render(); }],
-    G.coolerCd>0
-      ? [G.floor>=6
+  const coolerChoices = G.coolerCd>0
+    ? [
+        [G.floor>=6
           ? `마나샘 — 마나가 고이는 중 (전투 ${G.coolerCd}승 후 재사용)`
           : `정수기 — 생수통 교체 중 (전투 ${G.coolerCd}승 후 재사용)`, ()=>{
           pendingMsg.push(G.floor>=6
             ? '마나샘이 말라 있다. 전투에서 이기다 보면 마나가 다시 고인다.'
             : '생수통이 비어 있다. 전투에서 이기다 보면 새 생수통이 도착한다.');
           render();
-        }]
-      : [G.floor>=6 ? '마나샘에서 회복 (무료, 전원 완전 회복)' : '정수기에서 회복 (무료, 전원 완전 회복)', ()=>{
+        }],
+        [G.floor>=6 ? `└ 마나 결정 구매로 즉시 충전 (${COOLER_REFILL_COST}P)` : `└ 생수통 즉시 주문 (${COOLER_REFILL_COST}P)`, ()=>{
+          if(G.money < COOLER_REFILL_COST){
+            pendingMsg.push(`포인트가 부족하다… (필요: ${COOLER_REFILL_COST}P / 보유: ${G.money}P)`);
+            render(); return;
+          }
+          G.money -= COOLER_REFILL_COST;
+          G.coolerCd = 0;
+          pendingMsg.push(G.floor>=6
+            ? `마나 결정을 사서 샘에 녹였다! 마나샘을 바로 쓸 수 있다. (-${COOLER_REFILL_COST}P)`
+            : `퀵 배송으로 새 생수통이 도착했다! 정수기를 바로 쓸 수 있다. (-${COOLER_REFILL_COST}P)`);
+          render();
+        }],
+      ]
+    : [
+        [G.floor>=6 ? '마나샘에서 회복 (무료, 전원 완전 회복)' : '정수기에서 회복 (무료, 전원 완전 회복)', ()=>{
           G.party.forEach(m=>m.hp=m.maxhp);
           G.coolerCd = COOLER_RECHARGE_WINS;
           pendingMsg.push(`${G.floor>=6?'맑은 마나':'시원한 물'}와 함께 파티가 모두 회복되었다! (${COOLER_RECHARGE_WINS}승 후 재사용 가능)`);
           render();
         }],
+      ];
+  choices.push(
+    ['다른 층으로 이동', ()=>{ G.screen='moveFloor'; render(); }],
+    ...coolerChoices,
     ['매점 (복지포인트 사용)', ()=>{ G.screen='shop'; render(); }],
     ['합성 실험실 (등급 도전 / 신종 창조)', ()=>{ G.screen='fusion'; render(); }],
     ['가방', ()=>{ G.screen='bag'; render(); }],
