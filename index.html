@@ -1197,6 +1197,9 @@ function makeMon(sid, lv, rar){
 function monName(m){ return RARITY[m.rar||'normal'].prefix + SPECIES[m.sid].name; }
 function monCls(m){ return RARITY[m.rar||'normal'].cls; }
 function monType(m){ return SPECIES[m.sid].type; }
+/* 등급 심볼 (목록에서 황금/프리즘/레전드/신화 한눈에 구분) */
+function rarMark(rar){ rar=rar||'normal'; return rar==='mythic'?'✨':rar==='legend'?'👑':rar==='prism'?'◆':rar==='gold'?'★':''; }
+function rarTag(rar){ rar=rar||'normal'; return RARITY[rar].prefix.trim()||'일반'; }
 function minEvoLevelFor(sid){
   let min = Infinity;
   for(const base of ALL_SIDS){
@@ -2218,7 +2221,8 @@ function scrBox(){
   const choices = [];
   const start = boxPage*BOX_PAGE_SIZE;
   G.box.slice(start, start+BOX_PAGE_SIZE).forEach((m,i)=>{
-    choices.push([`${monName(m)} LV${m.lv} [${monType(m)}] HP ${m.hp}/${m.maxhp}${m.trait?' · '+m.trait:''}`,
+    const mk = rarMark(m.rar);
+    choices.push([`${mk?mk+' ':''}${monName(m)} LV${m.lv} [${monType(m)}]${dexCategory(m.sid)} HP ${m.hp}/${m.maxhp}${m.trait?' · '+m.trait:''}`,
       ()=>{ boxSel = start+i; render(); }]);
   });
   if(totalPages>1) choices.push([`다음 페이지 ▶ (${(boxPage+1)%totalPages+1}/${totalPages})`,
