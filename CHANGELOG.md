@@ -5,6 +5,12 @@
 
 ---
 
+## v4.3 — Firebase Hosting 배포 (2026-06-10)
+### 추가
+- 새 배포 주소: **https://cell-quest-5c949.web.app** (Firebase Hosting, 랭킹 DB와 동일 프로젝트)
+- 배포 설정 `firebase.json` / `.firebaserc` 추가 (게임 파일 `index.html`만 업로드)
+- 기존 GitHub Pages 주소도 계속 유지
+
 ## v4.2 — 전투 UI 개선 (2026-06-10 18:44, `d0128cd`)
 ### 추가
 - 전투 기술 메뉴에 **예상 데미지** 표시 (내 공격력 × 위력/40)
