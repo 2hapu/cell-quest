@@ -468,12 +468,14 @@ T('진화 재배치: 2단 진화 라인은 1단보다 충분히 뒤 (간격 ≥5
 });
 
 /* ── v5.7: 앰플 가격·야생 난이도·레벨 차 경험치·조합표 ── */
-T('앰플 가격 인상: 수상한 5000P / 디톡스 18000P', () =>
-  ITEM_DEF.ample.price === 5000 && ITEM_DEF.detox.price === 18000);
-T('레벨 차 경험치 페널티: 동레벨~+2는 100%, 큰 차이는 급감', () => {
+T('앰플 가격: 수상한 5000P / 디톡스 80000P (재굴림 남용 억제)', () =>
+  ITEM_DEF.ample.price === 5000 && ITEM_DEF.detox.price === 80000);
+T('레벨 차 경험치 페널티: 양방향 (저레벨 학살·고레벨 사냥 모두 감소)', () => {
   return expLevelFactor(10, 10) === 1 && expLevelFactor(12, 10) === 1
     && expLevelFactor(20, 10) < 0.5 && expLevelFactor(60, 10) === 0.12
-    && expLevelFactor(10, 30) === 1;  /* 적이 더 높으면 패널티 없음 */
+    && expLevelFactor(10, 13) === 1            /* 적이 3 높음: 아직 패널티 없음 */
+    && expLevelFactor(10, 20) < 1              /* 적이 10 높음: 경험치 감소 */
+    && expLevelFactor(10, 100) === 0.4;        /* 너무 높은 적: 최저 0.4 */
 });
 T('야생 강화: 일반 야생 적 HP/공격 상향, 전설은 소폭', () => {
   newGame(); G.party = [makeMon('espresso', 30)];
@@ -526,6 +528,101 @@ T('발급 가드: 빈 파티면 저장할 진행 없음으로 판단', () => {
   G.party = [makeMon('espresso', 5)];
   return hasProgressToSave() === true;
 });
+
+/* ── v5.9: 전투 중 회복 버그 + 인덱스/세이브 방어 ── */
+T('전투 중 모닝커피: 기절한 파티원을 HP 50%로 부활', () => {
+  newGame(); G.party = [makeMon('espresso', 20), makeMon('latte', 20)];
+  G.items.coffee = 1; G.active = 0;
+  startWildBattle(makeMon('mixrat', 5));
+  G.party[1].hp = 0;
+  useBattleHeal('coffee');
+  const ok = G.items.coffee === 0 && G.party[1].hp === Math.ceil(G.party[1].maxhp / 2);
+  G.battle = null; return ok;
+});
+T('전투 중 엘릭서: 가장 상태 나쁜 파티원 완전 회복', () => {
+  newGame(); G.party = [makeMon('espresso', 20), makeMon('latte', 20)];
+  G.items.elixir = 1; G.active = 0;
+  startWildBattle(makeMon('mixrat', 5));
+  G.party[1].hp = 1;
+  useBattleHeal('elixir');
+  const ok = G.items.elixir === 0 && G.party[1].hp === G.party[1].maxhp;
+  G.battle = null; return ok;
+});
+T('removeMon: 선두보다 앞 인덱스 제거 시 active 보정 (같은 선두 유지)', () => {
+  newGame(); G.party = [makeMon('espresso', 5), makeMon('latte', 5), makeMon('gian', 5), makeMon('mixrat', 5)];
+  G.active = 2; const lead = G.party[2];   /* 선두는 가운데(gian), 마지막이 아님 */
+  removeMon(G.party[0]);                    /* 선두보다 앞(espresso) 제거 */
+  return G.party[G.active] === lead;
+});
+T('migrateSave: 손상된 floor/active 범위 보정', () => {
+  const mig = migrateSave({ v: 5, party: [makeMon('espresso', 5)], box: [], floor: 999, active: 50 });
+  return mig.floor === FLOORS.length - 1 && mig.active === 0;
+});
+
+/* ── v5.9: 도핑 너프 + 레벨차 데미지 패널티 ── */
+T('도핑 너프: 5회 유지·확률 합 1·기대값 1 미만·실패 확률 우세(>50%)', () => {
+  const sumP = DOPE_OUTCOMES.reduce((s, o) => s + o.p, 0);
+  const ev = DOPE_OUTCOMES.reduce((s, o) => s + o.p * o.mult, 0);
+  const failP = DOPE_OUTCOMES.filter(o => o.mult < 1).reduce((s, o) => s + o.p, 0);
+  const maxGain = Math.max(...DOPE_OUTCOMES.map(o => o.mult));
+  return DOPE_MAX === 5 && Math.abs(sumP - 1) < 1e-9 && ev < 1 && failP > 0.5 && maxGain <= 1.15;
+});
+T('레벨차 데미지 패널티 함수: 고레벨 적이면 감소, 동급 이하는 1', () => {
+  return levelDmgFactor(10, 10) === 1 && levelDmgFactor(20, 10) === 1
+    && levelDmgFactor(10, 20) === Math.max(0.5, 1 - 10 * 0.04)
+    && levelDmgFactor(10, 200) === 0.5;
+});
+T('dmgCalc에 레벨차 패널티 반영 (고레벨 적에게 데미지 감소)', () => {
+  const a = makeMon('espresso', 10), lowDef = makeMon('mixrat', 10), highDef = makeMon('mixrat', 60);
+  const orig = Math.random; Math.random = () => 0.5;
+  const dLow = dmgCalc(a, 100, null, lowDef).val, dHigh = dmgCalc(a, 100, null, highDef).val;
+  Math.random = orig;
+  return dHigh < dLow;
+});
+
+/* ── v5.9: 신화(Mythic) 등급 + 뽑기 전용 2종 + 신화 합성 ── */
+T('신화 등급: rank 4·배율 1.75', () =>
+  !!RARITY.mythic && RARITY.mythic.rank === 4 && RARITY.mythic.mult === 1.75);
+T('뽑기 전용 신화 종족 2종 (gachaOnly·mythicSpecies)', () => {
+  const g = ALL_SIDS.filter(s => SPECIES[s].gachaOnly);
+  return g.length === 2 && g.every(s => SPECIES[s].mythicSpecies === true);
+});
+T('신화 종족은 등급 배율 캡(1.25) 면제 — 신화 배율 1.75 그대로', () => {
+  const sid = ALL_SIDS.find(s => SPECIES[s].gachaOnly), sp = SPECIES[sid];
+  return statsFor(sid, 40, 'mythic').atk === Math.round(sp.atk * (1 + 0.08 * 39) * 1.75);
+});
+T('신화 개체 생성 시 특성 부여 (rank>=3)', () => {
+  const sid = ALL_SIDS.find(s => SPECIES[s].gachaOnly), m = makeMon(sid, 1, 'mythic');
+  return m.rar === 'mythic' && !!m.trait && !!TRAITS[m.trait];
+});
+T('가챠 테이블: 가중치 합 1000·신화 행 존재(매우 낮은 확률)', () => {
+  const sum = GACHA_TABLE.reduce((s, r) => s + r[0], 0);
+  const row = GACHA_TABLE.find(r => r[1] === 'mythicMon');
+  return Boolean(row && Math.abs(sum - 1000) < 1e-9 && row[0] <= 0.5);
+});
+T('drawGachaOnce: 신화 당첨 시 신화 등급 뽑기 전용 종족 획득', () => {
+  newGame(); G.party = []; G.box = [];
+  const orig = Math.random; Math.random = () => 0.9999;
+  const msg = drawGachaOnce(gachaPools());
+  Math.random = orig;
+  const got = [...G.party, ...G.box].find(m => m.rar === 'mythic');
+  return Boolean(got && SPECIES[got.sid].gachaOnly && /신화/.test(msg));
+});
+T('신화 합성 레시피: 뽑기 전용 2종 → 신화 결과종(fusion·mythicSpecies)', () => {
+  const rc = FUSION_RECIPES.find(r => r.mythic);
+  return Boolean(rc && rc.mats.every(s => SPECIES[s] && SPECIES[s].gachaOnly)
+    && SPECIES[rc.to] && SPECIES[rc.to].fusion === true && SPECIES[rc.to].mythicSpecies === true);
+});
+T('가챠 풀 누수 차단: 신화 종족은 일반 가챠 풀(base/special)에 없음', () => {
+  newGame(); G.isekai = true; G.story = 27;
+  const { base, special } = gachaPools(), all = [...base, ...special];
+  return ALL_SIDS.filter(s => SPECIES[s].mythicSpecies).every(s => !all.includes(s));
+});
+T('전설·신화 도감 렌더 — 신화 종족 포함 (스모크)', () => {
+  newGame(); const sid = ALL_SIDS.find(s => SPECIES[s].gachaOnly);
+  G.party = [makeMon(sid, 1, 'mythic')]; G.dex[sid] = 2; G.rarDex[sid] = 'mythic';
+  G.screen = 'ldex'; render(); return true;
+});
 `;
 vm.runInContext(TESTS, ctx, { filename: 'tests' });
 
@@ -540,6 +637,8 @@ srcTest('랭킹 항목에 파티 스냅샷·선두 포함', /lead:G\.active/.tes
 srcTest('랭킹 정렬 기준 함수 사용', /function rankCompare/.test(html) && /rows\.sort\(rankCompare\)/.test(html));
 srcTest('예상 데미지에 상성 반영', /typeMult\(mv\[3\], monType\(e\)\)/.test(html));
 srcTest('랭킹 조회에 limitToLast 쿼리 사용', /orderBy=%22score%22&limitToLast/.test(html));
+srcTest('전투 가방에 모닝커피·엘릭서 추가', /useBattleHeal\('coffee'\)/.test(html) && /useBattleHeal\('elixir'\)/.test(html));
+srcTest('신화 합성: 결과 등급 mythic 고정', /rc\.mythic \? 'mythic'/.test(html));
 
 console.log(`\n테스트 결과: ${pass} PASS / ${fail} FAIL`);
 process.exit(fail ? 1 : 0);
