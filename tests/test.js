@@ -269,8 +269,8 @@ T('아레나 화면 렌더 (보드 비었을 때 그림자 폴백)', () => {
 T('migrateSave: arenaWins 기본값 보충', () => {
   const o = {}; migrateSave(o); return o.arenaWins === 0;
 });
-T('v6.5 버전 — 패치노트 최신·위장 제목 자동 반영', () =>
-  PATCH_NOTES[0].ver === 'v6.5' && GAME_VERSION === 'v6.5');
+T('v6.6 버전 — 패치노트 최신·위장 제목 자동 반영', () =>
+  PATCH_NOTES[0].ver === 'v6.6' && GAME_VERSION === 'v6.6');
 
 /* ── v6.1 일일 도전 + 출석 스트릭 ── */
 function ymd(offsetDays) { const d = new Date(); d.setDate(d.getDate() + offsetDays); const p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); }
@@ -405,6 +405,23 @@ T('8부 진진엔딩 화면 렌더 (원작자 격파)', () => {
 T('7부 진엔딩 화면 렌더 (싱귤라리스 격파)', () => {
   newGame(); G.party = [makeMon('espresso', 230)]; G.isekai = true; G.story = 50; G.screen = 'ending'; render(); return true;
 });
+
+/* ── v6.6 비주얼(디자인) 모드 ── */
+T('비주얼: monSprite — 모든 종족 SVG 문자열 반환', () =>
+  ALL_SIDS.every(s => { const v = monSprite(s); return typeof v === 'string' && v.indexOf('<svg') === 0; }));
+T('비주얼: 핵심 캐릭터 수제 SVG 존재 (스타터 3종)', () =>
+  ['espresso', 'gyeoljae', 'wifi'].every(s => HAND_SPRITES[s] && HAND_SPRITES[s].indexOf('<svg') === 0));
+T('비주얼: toggleView — excel↔visual 전환', () => {
+  newGame(); const a = G.viewMode; toggleView(); const b = G.viewMode; toggleView();
+  return a === 'excel' && b === 'visual' && G.viewMode === 'excel';
+});
+T('비주얼 모드 렌더 — 허브/메뉴 크래시 없음', () => {
+  newGame(); G.viewMode = 'visual'; G.party = [makeMon('espresso', 10)]; G.screen = 'hub'; render(); G.viewMode = 'excel'; return true;
+});
+T('비주얼 모드 렌더 — 전투씬 크래시 없음', () => {
+  newGame(); G.viewMode = 'visual'; G.party = [makeMon('espresso', 50)]; startBossBattle(0); render(); G.viewMode = 'excel'; return true;
+});
+T('migrateSave: viewMode 기본 excel', () => { const o = {}; migrateSave(o); return o.viewMode === 'excel'; });
 T('밸런스: 5부 리부트 보스 mult 상향 (≥1.55, 4부<5부≤6부)', () => {
   const five = BOSSES.slice(27, 34), four = BOSSES.slice(21, 27), six = BOSSES.slice(34);
   return five.length === 7 && five.every(B => B.mult >= 1.55) && BOSSES[33].mult >= 1.7
@@ -887,7 +904,7 @@ T('패치노트 데이터: 비어있지 않고 각 항목 형식 유효', () =>
   Array.isArray(PATCH_NOTES) && PATCH_NOTES.length >= 1
   && PATCH_NOTES.every(p => typeof p.ver === 'string' && typeof p.title === 'string'
     && Array.isArray(p.items) && p.items.length >= 1));
-T('패치노트 최신 항목은 v6.5', () => /6\.5/.test(PATCH_NOTES[0].ver));
+T('패치노트 최신 항목은 v6.6', () => /6\.6/.test(PATCH_NOTES[0].ver));
 T('패치노트 화면 렌더 (스모크)', () => { newGame(); patchPage = 0; G.screen = 'patchnotes'; render(); return true; });
 T('GAME_VERSION은 최신 패치 버전과 일치', () => GAME_VERSION === PATCH_NOTES[0].ver);
 T('위장 엑셀 제목에 최신 버전 주입', () => {

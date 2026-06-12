@@ -65,6 +65,42 @@
   .xlsdialog .dbtns { display:flex; justify-content:flex-end; gap:8px; padding:10px 14px 14px; }
   .xlsdialog button { padding:5px 18px; font-size:12px; border:1px solid #8a8a8a; background:#fdfdfd; cursor:pointer; }
   .xlsdialog button:hover { background:#e8f0e9; border-color:#217346; }
+  /* ════════════════ 비주얼 모드 (디자인 화면) ════════════════ */
+  #visual { position:absolute; inset:0; display:none; flex-direction:column; z-index:6;
+    background:radial-gradient(circle at 50% 28%,#eef6ff,#cdddf2); font-family:'맑은 고딕',sans-serif; color:#1a2a3a; overflow:auto; }
+  body.vmode #visual { display:flex; }
+  #visual .vhead { background:#217346; color:#fff; padding:10px 16px; font-size:16px; font-weight:bold; flex-shrink:0; display:flex; align-items:center; gap:8px; }
+  #visual .vbody { padding:12px 18px; font-size:13px; line-height:1.6; flex:1; }
+  #visual .vline.dim { color:#7a8aa0; } #visual .vline.hl { background:#fff7d1; padding:2px 6px; border-radius:4px; display:inline-block; }
+  #visual .vline.bold { font-weight:bold; font-size:15px; } #visual .vsp { height:8px; }
+  #visual .vbtns { display:flex; flex-wrap:wrap; gap:8px; padding:12px 18px; flex-shrink:0; }
+  #visual .vbtn { background:#fff; border:2px solid #217346; color:#185c37; border-radius:10px; padding:10px 16px; font-size:14px; cursor:pointer; box-shadow:0 2px 0 #1b5e3a; font-family:inherit; }
+  #visual .vbtn:hover { background:#eafaf0; transform:translateY(-1px); }
+  #visual .vbtn:active { transform:translateY(1px); box-shadow:none; }
+  #visual .vparty { display:flex; gap:10px; padding:6px 18px 0; flex-wrap:wrap; }
+  #visual .vpm { width:88px; text-align:center; font-size:10px; color:#33485f; }
+  #visual .vpm.lead { font-weight:bold; color:#185c37; }
+  #visual .spr { width:64px; height:64px; margin:0 auto; }
+  #visual .spr.big { width:150px; height:150px; }
+  #visual .spr svg { width:100%; height:100%; display:block; }
+  #visual .spr.rar-gold svg { filter:drop-shadow(0 0 4px #ffd24d); }
+  #visual .spr.rar-prism svg { filter:drop-shadow(0 0 5px #c98bff) drop-shadow(0 0 5px #8bd6ff); }
+  #visual .spr.rar-legend svg { filter:drop-shadow(0 0 6px #ffd700) drop-shadow(0 0 3px #ff8a00); }
+  #visual .spr.rar-mythic svg { animation:mythicglow 1.8s infinite alternate; }
+  @keyframes mythicglow { from { filter:drop-shadow(0 0 4px #ff7ad9); } to { filter:drop-shadow(0 0 11px #7affd9); } }
+  #visual .hpbar { height:7px; background:#cdd8e6; border-radius:4px; overflow:hidden; margin-top:4px; }
+  #visual .hpbar i { display:block; height:100%; background:linear-gradient(90deg,#3ad17a,#9be86a); }
+  #visual .hpbar i.low { background:linear-gradient(90deg,#ff5a5a,#ffa84d); }
+  /* 전투씬 */
+  #visual .vbattle { flex:1; display:flex; flex-direction:column; padding:14px; gap:8px; }
+  #visual .vbattle .foe { display:flex; justify-content:flex-end; align-items:center; gap:12px; }
+  #visual .vbattle .mine { display:flex; align-items:center; gap:12px; }
+  #visual .vbattle .info { background:rgba(255,255,255,.9); border:1px solid #b8cce4; border-radius:12px; padding:7px 14px; min-width:180px; font-size:13px; box-shadow:0 2px 6px rgba(40,70,110,.12); }
+  #visual .vbattle .info .hpn { font-size:11px; color:#56708c; }
+  #visual .vlog { background:rgba(255,255,255,.94); border:1px solid #b8cce4; border-radius:12px; padding:9px 14px; font-size:12px; min-height:52px; margin-top:auto; line-height:1.5; }
+  #visual .ty { font-size:10px; padding:1px 7px; border-radius:9px; background:#e2eefc; color:#2a5b8f; margin-left:4px; }
+  #visual .ty.t카페인 { background:#efe0d0; color:#7a4a1f; } #visual .ty.t서류 { background:#f6edc6; color:#876c12; }
+  #visual .ty.t전자 { background:#d6ecff; color:#1f6aa8; } #visual .ty.t야근 { background:#ecddf6; color:#6b2fa0; }
 </style>
 </head>
 <body>
@@ -95,7 +131,7 @@
   <div class="fcontent" id="fxcontent"></div>
 </div>
 
-<div class="sheetwrap"><table class="sheet" id="sheet"></table></div>
+<div class="sheetwrap"><table class="sheet" id="sheet"></table><div id="visual"></div></div>
 
 <div class="sheettabs">
   <div class="stab">요약</div>
@@ -1536,7 +1572,7 @@ function newGame(){
     v:SAVE_VERSION, screen:'title', name:'', pid:makePid(),
     party:[], box:[], active:0, revN:{}, mutFail:{},
     items:{ clip:5, goldclip:0, prismclip:0, dimclip:0, godclip:0, bacchus:3, hotsix:0, coffee:0, elixir:0, ample:0, detox:0, hair:0 },
-    money:200, wins:0, arenaWins:0, story:0, streak:0, isekai:false, gifts:{},
+    money:200, wins:0, arenaWins:0, story:0, streak:0, isekai:false, gifts:{}, viewMode:'excel',
     daily:{ date:'', streak:0, missions:[] },
     dex:{}, rarDex:{}, dexRewards:[],
     battle:null, log:[], floor:0, coolerCd:0, playMs:0,
@@ -2071,6 +2107,8 @@ function paintPartyPanel(){
 const CHOICE_KEYS = '123456789qwertyuiopasdfgh';
 const choiceKey = i => (CHOICE_KEYS[i]||'').toUpperCase();
 function paint(lines, choices, fx){
+  if(G.viewMode==='visual' && !bossMode){ syncViewMode(); paintVisual(lines, choices, fx); return; }
+  syncViewMode();
   clearGrid();
   let r = 2;
   for(const ln of lines){
@@ -2091,6 +2129,7 @@ function paint(lines, choices, fx){
 
 /* ════════════════ 화면 라우터 ════════════════ */
 function render(){
+  syncViewMode();
   if(bossMode){ paintBossSheet(); return; }
   localSave();
   const map = { title:scrTitle, starter:scrStarter, hub:scrHub, explore:scrExplore,
@@ -2101,6 +2140,83 @@ function render(){
     patchnotes:scrPatchNotes, arena:scrArena, daily:scrDaily, event:scrEvent };
   (map[G.screen]||scrHub)();
 }
+
+/* ════════════════ 비주얼 모드 (디자인 화면) — 엑셀 모드와 같은 G·엔진·세이브·Firebase 공유 ════════════════
+   paint(lines,choices)가 만든 동일 모델을 셀 그리드 대신 비주얼 DOM으로 렌더한다. 전투는 전용 씬. */
+const visualEl = document.getElementById('visual');
+let visualChoices = [];
+function vEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+const TYPE_COLOR  = { '카페인':'#8b5a2b', '서류':'#caa12a', '전자':'#2f9be0', '야근':'#6b2fa0' };
+const TYPE_COLOR2 = { '카페인':'#d9b38c', '서류':'#f0d878', '전자':'#cdeaff', '야근':'#b98be0' };
+function vHash(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+/* 핵심 캐릭터 수제 SVG 벡터 일러스트 (나머지는 절차적). 점진적으로 추가 가능. */
+const HAND_SPRITES = {
+  espresso:`<svg viewBox="0 0 100 100"><polygon points="30,30 26,8 46,26" fill="#6f4a2f"/><polygon points="70,30 74,8 54,26" fill="#6f4a2f"/><polygon points="33,26 31,15 41,25" fill="#caa"/><polygon points="67,26 69,15 59,25" fill="#caa"/><ellipse cx="50" cy="58" rx="34" ry="32" fill="#8b5a2b"/><ellipse cx="50" cy="66" rx="20" ry="20" fill="#d9b38c"/><circle cx="40" cy="54" r="7" fill="#fff"/><circle cx="60" cy="54" r="7" fill="#fff"/><circle cx="40" cy="55" r="3.4" fill="#2a1a0f"/><circle cx="60" cy="55" r="3.4" fill="#2a1a0f"/><path d="M46 64 l4 4 4 -4z" fill="#3b2a1a"/><path d="M50 68 q0 5 -5 6 M50 68 q0 5 5 6" stroke="#3b2a1a" stroke-width="1.6" fill="none"/><path d="M20 58 h14 M21 64 h13" stroke="#5c3a20" stroke-width="1.2"/><path d="M80 58 h-14 M79 64 h-13" stroke="#5c3a20" stroke-width="1.2"/></svg>`,
+  gyeoljae:`<svg viewBox="0 0 100 100"><ellipse cx="50" cy="56" rx="32" ry="34" fill="#caa12a"/><path d="M22 42 Q50 18 78 42 L70 50 Q50 34 30 50z" fill="#a8841f"/><circle cx="40" cy="52" r="8" fill="#fff"/><circle cx="60" cy="52" r="8" fill="#fff"/><circle cx="41" cy="53" r="3.6" fill="#1a1a1a"/><circle cx="59" cy="53" r="3.6" fill="#1a1a1a"/><polygon points="44,62 56,62 50,76" fill="#e8a13a"/><rect x="39" y="80" width="22" height="11" rx="2" fill="#c0392b"/><text x="50" y="89" font-size="7.5" fill="#fff" text-anchor="middle" font-family="sans-serif">결재</text></svg>`,
+  wifi:`<svg viewBox="0 0 100 100"><polygon points="28,34 22,6 48,28" fill="#2f9be0"/><polygon points="72,34 78,6 52,28" fill="#2f9be0"/><path d="M30 16 a10 10 0 0 1 13 0" stroke="#fff" stroke-width="2.2" fill="none"/><path d="M70 16 a10 10 0 0 0 -13 0" stroke="#fff" stroke-width="2.2" fill="none"/><ellipse cx="50" cy="58" rx="33" ry="30" fill="#2f9be0"/><ellipse cx="50" cy="66" rx="18" ry="16" fill="#cdeaff"/><circle cx="40" cy="55" r="7" fill="#fff"/><circle cx="60" cy="55" r="7" fill="#fff"/><circle cx="40" cy="56" r="3.3" fill="#10283a"/><circle cx="60" cy="56" r="3.3" fill="#10283a"/><polygon points="46,64 54,64 50,71" fill="#10283a"/></svg>`,
+};
+function proceduralSprite(sid){
+  const s=SPECIES[sid]||{type:'서류'}; const c=TYPE_COLOR[s.type]||'#888'; const c2=TYPE_COLOR2[s.type]||'#ccc';
+  const h=vHash(sid);
+  const bw=44+(h%12), bh=38+((h>>4)%16);
+  const earType=h%4, eo=((h>>6)%2)?1:-1, mouth=(h>>8)%3, belly=(h>>10)%2;
+  const ears = earType===0?'' :
+    earType===1?`<polygon points="35,28 30,6 46,24" fill="${c}"/><polygon points="65,28 70,6 54,24" fill="${c}"/>`:
+    earType===2?`<circle cx="34" cy="22" r="9" fill="${c}"/><circle cx="66" cy="22" r="9" fill="${c}"/>`:
+    `<path d="M37 26 Q31 6 43 14" stroke="${c}" stroke-width="5" fill="none"/><path d="M63 26 Q69 6 57 14" stroke="${c}" stroke-width="5" fill="none"/>`;
+  const bellySvg = belly?`<ellipse cx="50" cy="63" rx="${bw*0.55}" ry="${bh*0.62}" fill="${c2}" opacity=".85"/>`:'';
+  const mouthSvg = mouth===0?`<path d="M44 70 Q50 76 56 70" stroke="#22303f" stroke-width="2" fill="none"/>`:
+                   mouth===1?`<ellipse cx="50" cy="72" rx="5" ry="3" fill="#22303f"/>`:
+                   `<path d="M45 71 L55 71" stroke="#22303f" stroke-width="2"/>`;
+  return `<svg viewBox="0 0 100 100">${ears}<ellipse cx="50" cy="58" rx="${bw}" ry="${bh}" fill="${c}"/>${bellySvg}`+
+    `<circle cx="42" cy="54" r="8" fill="#fff"/><circle cx="58" cy="54" r="8" fill="#fff"/>`+
+    `<circle cx="${42+eo*2}" cy="55" r="3.6" fill="#1a1a1a"/><circle cx="${58+eo*2}" cy="55" r="3.6" fill="#1a1a1a"/>${mouthSvg}</svg>`;
+}
+function monSprite(sid){ return HAND_SPRITES[sid] || proceduralSprite(sid); }
+function spriteHTML(m, big){ return `<div class="spr rar-${m.rar||'normal'}${big?' big':''}">${monSprite(m.sid)}</div>`; }
+function hpClass(m){ return (m.hp < m.maxhp*0.3) ? ' low' : ''; }
+function tyTag(m){ const t=monType(m); return `<span class="ty t${t}">${t}</span>`; }
+
+function renderBattleScene(choices){
+  const b=G.battle, e=b.enemy, me=activeMon();
+  if(!e || !me){ renderPanel([['전투','bold']], choices); return; }
+  const eHP=Math.max(0,Math.round(e.hp/e.maxhp*100)), mHP=Math.max(0,Math.round(me.hp/me.maxhp*100));
+  const foeLabel = b.wild ? '' : `<div class="ty">${vEsc(b.arena?(b.foeName||'사원'):(BOSSES[b.bossIdx]?BOSSES[b.bossIdx].name:'보스'))}</div>`;
+  const log=(G.log||[]).slice(-3).map(vEsc).join('<br>');
+  const btns=choices.map((ch,i)=>`<button class="vbtn" data-choice="${i}">${vEsc(ch[0])}</button>`).join('');
+  visualEl.innerHTML =
+    `<div class="vbattle">`+
+    `<div class="foe"><div class="info">${vEsc(monName(e))} <b>L${e.lv}</b>${tyTag(e)}${foeLabel}<div class="hpbar"><i class="${hpClass(e)}" style="width:${eHP}%"></i></div></div>${spriteHTML(e,true)}</div>`+
+    `<div class="mine">${spriteHTML(me,true)}<div class="info">${vEsc(monName(me))} <b>L${me.lv}</b>${tyTag(me)} <span class="hpn">${Math.max(0,me.hp)}/${me.maxhp}</span><div class="hpbar"><i class="${hpClass(me)}" style="width:${mHP}%"></i></div></div></div>`+
+    `<div class="vlog">${log||'전투 시작!'}</div>`+
+    `<div class="vbtns battle">${btns}</div></div>`;
+}
+function renderPanel(lines, choices, fx){
+  const first = lines[0]; const title = first ? (Array.isArray(first)?first[0]:first) : '셀 퀘스트';
+  const body = lines.slice(1).map(ln=>{
+    const t = Array.isArray(ln)?ln[0]:ln, cls = Array.isArray(ln)?(ln[1]||''):'';
+    return t==='' ? '<div class="vsp"></div>' : `<div class="vline ${cls}">${vEsc(t)}</div>`;
+  }).join('');
+  let party='';
+  if(G.party && G.party.length && G.screen!=='title'){
+    party = `<div class="vparty">`+G.party.map((m,i)=>
+      `<div class="vpm ${i===G.active?'lead':''}">${spriteHTML(m)}<div>${vEsc(monName(m))} L${m.lv}</div><div class="hpbar"><i class="${hpClass(m)}" style="width:${Math.max(0,m.hp/m.maxhp*100)}%"></i></div></div>`).join('')+`</div>`;
+  }
+  const btns = choices.map((ch,i)=>`<button class="vbtn" data-choice="${i}">${vEsc(ch[0])}</button>`).join('');
+  visualEl.innerHTML = `<div class="vhead">🎮 ${vEsc(title)}</div><div class="vbody">${body}</div>${party}<div class="vbtns">${btns}</div>`;
+}
+function paintVisual(lines, choices, fx){
+  visualChoices = choices || [];
+  if(G.screen==='battle' && G.battle) renderBattleScene(visualChoices);
+  else renderPanel(lines||[], visualChoices, fx);
+}
+function syncViewMode(){ const b=document.body; if(b&&b.classList&&b.classList.toggle) b.classList.toggle('vmode', G.viewMode==='visual' && !bossMode); }
+function toggleView(){ G.viewMode = (G.viewMode==='visual') ? 'excel' : 'visual'; localSave(); render(); }
+/* 비주얼 버튼 클릭 → 동일 choices 핸들러 호출 (셀 그리드와 같은 로직) */
+if(visualEl) visualEl.addEventListener('click', e=>{
+  let n = e.target; while(n && n!==visualEl && !(n.dataset && n.dataset.choice!==undefined)) n = n.parentNode;
+  if(n && n.dataset && n.dataset.choice!==undefined){ const i=+n.dataset.choice; if(visualChoices[i] && visualChoices[i][1]) visualChoices[i][1](); }
+});
 
 /* ── 타이틀 / 스타터 ── */
 function scrTitle(){
@@ -2138,6 +2254,7 @@ function scrTitle(){
   if(hasCloudSave) choices.push([cloudCode?'☁ 클라우드 계정 (코드)':'☁ 클라우드 코드로 불러오기', ()=>{ G.screen='cloud'; render(); }]);
   choices.push(['백업 코드 불러오기', openLoadDlg]);
   choices.push(['📋 패치노트 (업데이트 내역)', ()=>{ patchPage=0; G.screen='patchnotes'; render(); }]);
+  choices.push([G.viewMode==='visual'?'📊 엑셀(시트) 화면으로':'🎨 비주얼(디자인) 화면으로', toggleView]);
   paint(lines, choices, '=GAME.START()');
 }
 
@@ -2306,6 +2423,7 @@ function scrHub(){
   if(hasBoard) choices.push(['사내 랭킹 보드', ()=>{ G.screen='rank'; render(); }]);
   choices.push(['🥊 사내 대전 (아레나 · PvP)', ()=>{ arenaMsg=''; G.screen='arena'; render(); }]);
   choices.push([`📅 일일 도전${G.daily&&G.daily.missions?` (${G.daily.missions.filter(m=>m.done&&!m.claimed).length>0?'수령 가능!':G.daily.missions.filter(m=>m.done).length+'/3'})`:''}`, ()=>{ dailyMsg=''; G.screen='daily'; render(); }]);
+  choices.push([G.viewMode==='visual'?'📊 엑셀(시트) 화면으로 전환':'🎨 비주얼(디자인) 화면으로 전환', toggleView]);
   choices.push(['사내 위키 (도움말)', ()=>{ G.screen='wiki'; render(); }]);
   choices.push(['📋 패치노트 (업데이트 내역)', ()=>{ patchPage=0; G.screen='patchnotes'; render(); }]);
   if(hasCloudSave){
@@ -2724,6 +2842,12 @@ function scrGacha(){
 /* ── 인게임 패치노트: 배포 사이트에서도 최근 업데이트를 볼 수 있게.
    전체 이력은 저장소의 CHANGELOG.md, 여기엔 핵심만 요약해 최신순으로 둔다. ── */
 const PATCH_NOTES = [
+  { ver:'v6.6', title:'비주얼(디자인) 모드 — 포켓몬식 전투 화면', items:[
+    '🎨 엑셀 시트 외에 캐릭터 디자인이 들어간 비주얼 모드 추가 — 허브·타이틀에서 전환(세이브·랭킹·전투 엔진 전부 공유)',
+    '⚔ 포켓몬식 전투씬 — 상대/내 몬스터 스프라이트·HP바·로그·기술 버튼',
+    '🐾 전 종족 절차적 SVG 캐릭터(타입·개성별) + 스타터 수제 일러스트 — 핵심 캐릭터는 점진적으로 손그림 확장 예정',
+    '🖼 희귀도(황금·프리즘·레전드·신화) 시각 효과',
+  ]},
   { ver:'v6.5', title:'7·8부 신규 차원 — 클라우드 신계 · 소스 차원(진진엔딩)', items:[
     '☁ 7부 「클라우드 신계 — 무한 확장」 (LV200~230, 8층) — AI·뉴럴넷·오토스케일, 최종보스 AI 인사총괄 싱귤라리스',
     '💻 8부 「소스 차원 — 최후의 커밋」 (LV230~260, 8층, 진진엔딩) — git·레거시·디버거·창조주, 최종보스 원작자',
@@ -4127,6 +4251,7 @@ function migrateSave(obj){
   if(obj.items && obj.items.hair===undefined) obj.items.hair = 0;
   if(typeof obj.streak!=='number') obj.streak = 0;
   if(typeof obj.arenaWins!=='number') obj.arenaWins = 0;
+  if(obj.viewMode!=='visual') obj.viewMode = 'excel';
   if(!obj.daily || typeof obj.daily!=='object') obj.daily = { date:'', streak:0, missions:[] };
   if(obj.isekai===undefined) obj.isekai = false;
   if(!obj.gifts) obj.gifts = {};
@@ -4259,8 +4384,8 @@ document.addEventListener('keydown', e=>{
   if(!bossMode){
     const ki = CHOICE_KEYS.indexOf(e.key.toLowerCase());
     if(ki>=0){
-      const tds=[...sheetEl.querySelectorAll('td.choice')];
-      if(tds[ki]) tds[ki].click();
+      if(G.viewMode==='visual'){ if(visualChoices[ki] && visualChoices[ki][1]) visualChoices[ki][1](); }
+      else { const tds=[...sheetEl.querySelectorAll('td.choice')]; if(tds[ki]) tds[ki].click(); }
     }
   }
 });
