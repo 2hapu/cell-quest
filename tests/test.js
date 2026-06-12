@@ -425,6 +425,15 @@ T('비주얼 모드 렌더 — 전투씬 크래시 없음', () => {
   newGame(); G.viewMode = 'visual'; G.party = [makeMon('espresso', 50)]; startBossBattle(0); render(); G.viewMode = 'excel'; return true;
 });
 T('migrateSave: viewMode 기본 excel', () => { const o = {}; migrateSave(o); return o.viewMode === 'excel'; });
+T('이스터에그: K30 5번 클릭 → 50만P, 반복 가능', () => {
+  newGame(); G.money = 0;
+  for (let i = 0; i < 4; i++) eggK30();
+  const before = G.money;
+  eggK30();
+  const after5 = G.money;
+  for (let i = 0; i < 5; i++) eggK30();
+  return before === 0 && after5 === 500000 && G.money === 1000000;
+});
 T('밸런스: 5부 리부트 보스 mult 상향 (≥1.55, 4부<5부≤6부)', () => {
   const five = BOSSES.slice(27, 34), four = BOSSES.slice(21, 27), six = BOSSES.slice(34);
   return five.length === 7 && five.every(B => B.mult >= 1.55) && BOSSES[33].mult >= 1.7

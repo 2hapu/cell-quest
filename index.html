@@ -186,6 +186,7 @@ let cells = [];
       td.classList.add('selected');
       document.getElementById('namebox').textContent = colName(+td.dataset.c)+td.dataset.r;
       document.getElementById('fxcontent').textContent = td.textContent;
+      if(+td.dataset.r===30 && +td.dataset.c===10) eggK30();   /* 숨겨진 보너스: K30 5번 클릭 */
     });
   });
 })();
@@ -202,6 +203,24 @@ function setCell(r,c,text,cls,onclick){
 }
 function setStatus(t){ document.getElementById('statustext').textContent = t; }
 function setFx(t){ document.getElementById('fxcontent').textContent = t; }
+/* ── 숨겨진 보너스: 엑셀 셀 K30을 5번 클릭하면 복지포인트 +50만 (반복 가능) ── */
+const EGG_K30_REWARD = 500000, EGG_K30_CLICKS = 5;
+let k30clicks = 0;
+function eggK30(){
+  if(typeof G==='undefined' || !G || typeof G.money!=='number') return;
+  k30clicks++;
+  if(k30clicks >= EGG_K30_CLICKS){
+    k30clicks = 0;
+    G.money += EGG_K30_REWARD;
+    try{ localSave(); }catch(e){}
+    if(typeof pendingMsg!=='undefined' && Array.isArray(pendingMsg)) pendingMsg.push(`🎉 숨겨진 보너스 발견! 복지포인트 +${EGG_K30_REWARD.toLocaleString()}P`);
+    if(typeof render==='function') render();
+    setStatus('🎉 보너스 지급!');
+    setFx(`=K30.BONUS() → +${EGG_K30_REWARD.toLocaleString()}P  (보유 ${G.money.toLocaleString()}P)`);
+  } else {
+    setFx(`=K30  (${k30clicks}/${EGG_K30_CLICKS}…)`);
+  }
+}
 
 /* ════════════════ 데이터: 타입/기술/종족 ════════════════ */
 const TRIANGLE = { '카페인':'서류', '서류':'전자', '전자':'카페인' };
